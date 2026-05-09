@@ -2,47 +2,319 @@
 <html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Skardu Organic | Premium Himalayan Products</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#FDFBF7" />
+    <meta name="color-scheme" content="light" />
+
+    <!-- Primary SEO -->
+    <title>Skardu Organic | Pure Himalayan Shilajit, Apricot Oil & Dry Fruits from Gilgit-Baltistan</title>
+    <meta name="description" content="Shop 100% pure, lab-tested Himalayan Shilajit, cold-pressed Apricot Oil, organic dried apricots and almonds — sourced directly from the pristine valleys of Gilgit-Baltistan, Pakistan. Free shipping on orders over Rs 2000." />
+    <meta name="keywords" content="pure shilajit Pakistan, organic shilajit, Himalayan shilajit, Gilgit-Baltistan shilajit, Skardu organics, pure apricot oil, cold pressed apricot oil, organic dried apricots, Hunza almonds, natural wellness Pakistan, shilajit benefits, organic dry fruits, immunity booster, ayurvedic supplements, Pakistani superfood, Skardu honey, ethically sourced organic, lab tested shilajit, shilajit resin, fulvic acid supplement" />
+    <meta name="author" content="Skardu Organics" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <link rel="canonical" href="https://skarduorganic.com/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Skardu Organic" />
+    <meta property="og:title" content="Skardu Organic — Pure Himalayan Shilajit & Organic Dry Fruits" />
+    <meta property="og:description" content="Lab-tested Himalayan Shilajit, cold-pressed Apricot Oil, and organic dry fruits sourced from Gilgit-Baltistan." />
+    <meta property="og:url" content="https://skarduorganic.com/" />
+    <meta property="og:image" content="https://skarduorganic.com/img/Hero-section.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Skardu Organic — Pure Himalayan Shilajit & Organic Dry Fruits" />
+    <meta name="twitter:description" content="Lab-tested Himalayan Shilajit, cold-pressed Apricot Oil, and organic dry fruits from Gilgit-Baltistan." />
+    <meta name="twitter:image" content="https://skarduorganic.com/img/Hero-section.png" />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" href="/img/Organic-Shilajit-20g.png" />
+    <link rel="apple-touch-icon" href="/img/Organic-Shilajit-20g.png" />
+
+    <!-- Preconnect / Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com" />
+
+    <!-- Premium Fonts: Fraunces (editorial serif) + Plus Jakarta Sans (premium grotesk) + JetBrains Mono (eyebrows) -->
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,800;0,9..144,900;1,9..144,400&family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#1A3C34',
-                        secondary: '#C8A165',
-                        accent: '#E8F1EE',
-                        dark: '#121212',
-                        light: '#FAFAF9',
+                        // Editorial Luxury palette — warm cream + deep espresso + muted sage
+                        primary:   '#2C3A2E',   // Deep forest espresso (replaces #1A3C34)
+                        secondary: '#A9824D',   // Burnished bronze (replaces #C8A165)
+                        accent:    '#EFE8DA',   // Warm cream
+                        dark:      '#1A1816',   // Espresso black
+                        light:     '#FDFBF7',   // Paper cream
+                        sage:      '#8FA48C',
+                        bronze:    '#A9824D',
+                        ink:       '#1A1816',
+                        cream:     '#FDFBF7',
+                        bone:      '#F4EFE3',
+                        moss:      '#5C6F58',
                     },
                     fontFamily: {
-                        serif: ['Lora', 'serif'],
-                        sans: ['Montserrat', 'sans-serif'],
+                        serif: ['Fraunces', 'PP Editorial New', 'Lora', 'serif'],
+                        sans:  ['Plus Jakarta Sans', 'Geist', 'system-ui', 'sans-serif'],
+                        mono:  ['JetBrains Mono', 'ui-monospace', 'monospace'],
+                    },
+                    letterSpacing: {
+                        'eyebrow': '0.22em',
+                    },
+                    transitionTimingFunction: {
+                        'spring':  'cubic-bezier(0.32, 0.72, 0, 1)',
+                        'silk':    'cubic-bezier(0.16, 1, 0.3, 1)',
+                        'haptic':  'cubic-bezier(0.65, 0, 0.35, 1)',
+                    },
+                    boxShadow: {
+                        'paper':   '0 1px 0 rgba(26,24,22,0.04), 0 8px 24px -12px rgba(26,24,22,0.08)',
+                        'lift':    '0 24px 60px -28px rgba(44,58,46,0.25), 0 8px 20px -10px rgba(44,58,46,0.10)',
+                        'inset-hi':'inset 0 1px 0 rgba(255,255,255,0.6)',
+                    },
+                    keyframes: {
+                        'fade-up': {
+                            '0%':   { opacity: '0', transform: 'translateY(24px)', filter: 'blur(6px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)',    filter: 'blur(0)' },
+                        },
+                        'fade-in': {
+                            '0%':   { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        'slide-up': {
+                            '0%':   { opacity: '0', transform: 'translateY(40px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        'shimmer': {
+                            '0%, 100%': { backgroundPosition: '0% 50%' },
+                            '50%':      { backgroundPosition: '100% 50%' },
+                        },
+                    },
+                    animation: {
+                        'fade-up': 'fade-up 0.9s cubic-bezier(0.16,1,0.3,1) both',
+                        'fade-in': 'fade-in 0.6s ease-out both',
+                        'slide-up': 'slide-up 0.8s cubic-bezier(0.16,1,0.3,1) both',
+                        'shimmer': 'shimmer 8s ease-in-out infinite',
                     },
                 }
             }
         }
     </script>
     <style>
+        :root {
+            --color-primary: #2C3A2E;
+            --color-secondary: #A9824D;
+            --color-cream: #FDFBF7;
+            --color-bone: #F4EFE3;
+            --color-ink: #1A1816;
+        }
+
+        * { -webkit-tap-highlight-color: transparent; }
+
+        html { font-feature-settings: "ss01", "ss02", "cv11"; }
+
         body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: #FAFAF9;
-            color: #121212;
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            background-color: #FDFBF7;
+            color: #1A1816;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            font-feature-settings: "ss01", "cv11";
         }
+
         h1, h2, h3, h4, h5, h6 {
-            font-family: 'Lora', serif;
+            font-family: 'Fraunces', 'Lora', serif;
+            font-feature-settings: "ss01", "ss02";
+            letter-spacing: -0.02em;
         }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #1A3C34; border-radius: 4px; }
+
+        h1 { font-variation-settings: "opsz" 144, "SOFT" 30; }
+        h2 { font-variation-settings: "opsz" 96,  "SOFT" 30; }
+
+        /* Premium scrollbar */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #FDFBF7; }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #2C3A2E, #5C6F58);
+            border-radius: 999px;
+            border: 2px solid #FDFBF7;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: #2C3A2E; }
+
+        /* Selection */
+        ::selection { background: #A9824D; color: #FDFBF7; }
+
+        /* Film-grain noise overlay — fixed, non-interactive */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.035;
+            mix-blend-mode: multiply;
+            background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+        }
+
+        /* Double-Bezel utility helpers */
+        .bezel-shell {
+            background: rgba(44, 58, 46, 0.04);
+            box-shadow: inset 0 0 0 1px rgba(44, 58, 46, 0.08), 0 1px 0 rgba(255,255,255,0.6);
+            border-radius: 2rem;
+            padding: 0.4rem;
+        }
+        .bezel-core {
+            border-radius: calc(2rem - 0.4rem);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 1px 2px rgba(26,24,22,0.04);
+        }
+
+        /* Magnetic CTA pill */
+        .cta-magnetic {
+            transition: transform 0.5s cubic-bezier(0.32,0.72,0,1), box-shadow 0.5s cubic-bezier(0.32,0.72,0,1), background-color 0.4s ease;
+        }
+        .cta-magnetic:hover { transform: translateY(-2px); }
+        .cta-magnetic:active { transform: scale(0.985); }
+        .cta-magnetic .cta-orb {
+            transition: transform 0.6s cubic-bezier(0.32,0.72,0,1);
+        }
+        .cta-magnetic:hover .cta-orb {
+            transform: translateX(4px) translateY(-1px) rotate(-8deg);
+        }
+
+        /* Eyebrow tag */
+        .eyebrow {
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.22em;
+            font-weight: 500;
+        }
+
+        /* Hairline */
+        .hairline { border-color: rgba(26,24,22,0.08); }
+
+        /* Custom animations referenced by App.tsx */
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fade-in 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+
+        @keyframes slide-up {
+            from { opacity: 0; transform: translateY(32px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide-up { animation: slide-up 0.8s cubic-bezier(0.16,1,0.3,1) both; }
+
+        /* Reveal-on-view (used via IntersectionObserver) */
+        .reveal { opacity: 0; transform: translateY(28px); filter: blur(6px); transition: opacity .9s cubic-bezier(0.16,1,0.3,1), transform .9s cubic-bezier(0.16,1,0.3,1), filter .9s ease; }
+        .reveal.in { opacity: 1; transform: translateY(0); filter: blur(0); }
+
+        /* Reduce motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Marquee for trust bar */
+        @keyframes marquee {
+            from { transform: translateX(0); }
+            to   { transform: translateX(-50%); }
+        }
+        .marquee-track { animation: marquee 40s linear infinite; }
+
+        /* iOS Safari viewport fix */
+        .min-h-dvh { min-height: 100dvh; }
+
+        /* Premium image rendering */
+        img { image-rendering: -webkit-optimize-contrast; }
     </style>
+
+    <!-- Structured Data: Organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Skardu Organic",
+      "alternateName": "Skardu Organics",
+      "url": "https://skarduorganic.com/",
+      "logo": "https://skarduorganic.com/img/Organic-Shilajit-20g.png",
+      "description": "Premium 100% organic Himalayan Shilajit, cold-pressed apricot oil, and dry fruits sourced from the valleys of Gilgit-Baltistan.",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Office 403, 4th floor, Building Park Lane, E 11/2",
+        "addressLocality": "Islamabad",
+        "addressCountry": "PK"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+92-348-887-5456",
+        "contactType": "customer service",
+        "email": "support@skarduorganic.com",
+        "areaServed": "PK",
+        "availableLanguage": ["en", "ur"]
+      },
+      "sameAs": []
+    }
+    </script>
+
+    <!-- Structured Data: Website -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Skardu Organic",
+      "url": "https://skarduorganic.com/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://skarduorganic.com/#/shop?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- Structured Data: Store -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Store",
+      "name": "Skardu Organic",
+      "image": "https://skarduorganic.com/img/Hero-section.png",
+      "priceRange": "Rs",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Islamabad",
+        "addressCountry": "PK"
+      }
+    }
+    </script>
 </head>
 <body>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
+    <script>
+      // Lightweight scroll-reveal observer
+      (function(){
+        if (typeof IntersectionObserver === 'undefined') return;
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+        const attach = () => document.querySelectorAll('.reveal:not(.in)').forEach(el => io.observe(el));
+        attach();
+        new MutationObserver(attach).observe(document.body, { childList: true, subtree: true });
+      })();
+    </script>
 </body>
 </html>

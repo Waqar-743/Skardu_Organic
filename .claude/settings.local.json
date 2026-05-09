@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm audit *)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(netstat -ano)",
+      "Bash(findstr :5173)",
+      "Bash(curl -s http://localhost:5173)",
+      "Bash(curl -s \"http://localhost:3002/E-commerce-store/\")",
+      "Read(//tmp/**)",
+      "Bash(curl -s \"http://localhost:3004/E-commerce-store/\")",
+      "Bash(curl -s \"http://localhost:3004/E-commerce-store/assets/index-DjRdM-f4.js\")"
+    ]
+  }
+}

@@ -5,7 +5,6 @@ import { HERO_SLIDES, TESTIMONIALS } from './constants';
 import { SHILAJIT_IMAGE_URL, BUY1_GET1_FREE_URL, PURE_APRICOT_OIL_URL } from './assets';
 import { ShoppingCartIcon, UserIcon, TruckIcon, LeafIcon, SavingsIcon, ReturnIcon, StarIcon, SendIcon, SearchIcon, XIcon, PlusIcon, MinusIcon, ChevronLeftIcon, ChevronRightIcon, MenuIcon, FilterIcon, ShieldCheckIcon, MountainIcon, HandHeartIcon, PureDropIcon, HistoryIcon, CreditCardIcon, SmartphoneIcon } from './components/Icons';
 import { MOCK_PRODUCTS } from './mockData';
-import { supabase } from './lib/supabase';
 
 // --- CONSTANTS & THEME ---
 // Note: Color theme is largely handled by Tailwind custom config in index.html
@@ -128,99 +127,23 @@ interface ProductContextType {
 const ProductContext = createContext<ProductContextType | null>(null);
 
 const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS);
+    const loading = false;
+    const error = '';
 
-    const fetchProducts = async () => {
-        setLoading(true);
-        setError('');
-        try {
-            // Try to fetch from Supabase
-            const { data: productsData, error: productsError } = await supabase
-                .from('products')
-                .select('*')
-                .order('created_at', { ascending: false });
+    const refreshProducts = () => {/* no-op: using local data */};
 
-            if (productsError) {
-                console.warn('Supabase error, falling back to mock data:', productsError.message);
-                setProducts(MOCK_PRODUCTS);
-            } else if (productsData && productsData.length > 0) {
-                // Fetch reviews for each product
-                const { data: reviewsData } = await supabase
-                    .from('reviews')
-                    .select('*');
-
-                // Map Supabase data to our Product type
-                const mappedProducts: Product[] = productsData.map(p => {
-                    const productReviews = reviewsData?.filter(r => r.product_id === p.id) || [];
-                    return {
-                        _id: p.id,
-                        name: p.name,
-                        image: p.image,
-                        brand: p.brand,
-                        category: p.category,
-                        description: p.description,
-                        price: p.price,
-                        countInStock: p.count_in_stock,
-                        rating: p.rating || 0,
-                        numReviews: p.num_reviews || 0,
-                        reviews: productReviews.map(r => ({
-                            _id: r.id,
-                            name: r.name,
-                            rating: r.rating,
-                            comment: r.comment || '',
-                            createdAt: r.created_at
-                        }))
-                    };
-                });
-                setProducts(mappedProducts);
-            } else {
-                // No products in Supabase, use mock data
-                console.log('No products in Supabase, using mock data');
-                setProducts(MOCK_PRODUCTS);
-            }
-        } catch (err: any) {
-            console.warn('Error fetching products, using mock data:', err.message);
-            setProducts(MOCK_PRODUCTS);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchProducts();
-    }, []);
-
-    const refreshProducts = () => {
-        fetchProducts();
-    };
-
-    const updateProductStock = async (productId: string, quantityChange: number) => {
-        // Update local state immediately for better UX
-        setProducts(prevProducts =>
-            prevProducts.map(p =>
+    const updateProductStock = (productId: string, quantityChange: number) => {
+        setProducts(prev =>
+            prev.map(p =>
                 p._id === productId
                     ? { ...p, countInStock: p.countInStock + quantityChange }
                     : p
             )
         );
-
-        // Try to update in Supabase (fire and forget for now)
-        try {
-            const product = products.find(p => p._id === productId);
-            if (product) {
-                await supabase
-                    .from('products')
-                    .update({ count_in_stock: product.countInStock + quantityChange })
-                    .eq('id', productId);
-            }
-        } catch (err) {
-            console.warn('Failed to update stock in Supabase:', err);
-        }
     };
 
-    const addProductReview = async (productId: string, reviewData: {name: string, rating: number, comment: string}) => {
+    const addProductReview = (productId: string, reviewData: { name: string; rating: number; comment: string }) => {
         const newReview: Review = {
             _id: Date.now().toString(),
             name: reviewData.name,
@@ -229,38 +152,19 @@ const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
             createdAt: new Date().toISOString(),
         };
 
-        // Update local state immediately
-        setProducts(prevProducts =>
-            prevProducts.map(p => {
-                if (p._id === productId) {
-                    const currentReviews = p.reviews || [];
-                    const updatedReviews = [...currentReviews, newReview];
-                    const newRating = updatedReviews.reduce((acc, r) => acc + r.rating, 0) / updatedReviews.length;
-
-                    return {
-                        ...p,
-                        reviews: updatedReviews,
-                        numReviews: updatedReviews.length,
-                        rating: parseFloat(newRating.toFixed(1))
-                    };
-                }
-                return p;
+        setProducts(prev =>
+            prev.map(p => {
+                if (p._id !== productId) return p;
+                const updatedReviews = [...(p.reviews || []), newReview];
+                const newRating = updatedReviews.reduce((acc, r) => acc + r.rating, 0) / updatedReviews.length;
+                return {
+                    ...p,
+                    reviews: updatedReviews,
+                    numReviews: updatedReviews.length,
+                    rating: parseFloat(newRating.toFixed(1)),
+                };
             })
         );
-
-        // Try to save to Supabase
-        try {
-            const { data: session } = await supabase.auth.getSession();
-            await supabase.from('reviews').insert({
-                product_id: productId,
-                user_id: session?.session?.user?.id || null,
-                name: reviewData.name,
-                rating: reviewData.rating,
-                comment: reviewData.comment
-            });
-        } catch (err) {
-            console.warn('Failed to save review to Supabase:', err);
-        }
     };
 
     const value = { products, updateProductStock, addProductReview, loading, error, refreshProducts };
@@ -365,167 +269,61 @@ const useCart = () => useContext(CartContext) as CartContextType;
 // --- AUTH CONTEXT ---
 const AuthContext = createContext<AuthContextType | null>(null);
 
+const LOCAL_STORAGE_KEY = 'skardu_user';
+
 const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [currentUser, setCurrentUser] = useState<User | null>(null);
-    const [authLoading, setAuthLoading] = useState(true);
+    const [currentUser, setCurrentUser] = useState<User | null>(() => {
+        try {
+            const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+            return saved ? JSON.parse(saved) : null;
+        } catch {
+            return null;
+        }
+    });
 
-    useEffect(() => {
-        // Check for existing session on mount
-        const initializeAuth = async () => {
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session?.user) {
-                    // Fetch user profile from profiles table
-                    const { data: profile } = await supabase
-                        .from('profiles')
-                        .select('*')
-                        .eq('id', session.user.id)
-                        .single();
-
-                    setCurrentUser({
-                        _id: session.user.id,
-                        name: profile?.name || session.user.email?.split('@')[0] || 'User',
-                        email: session.user.email || '',
-                        isAdmin: profile?.is_admin || false,
-                        token: session.access_token,
-                    });
-                }
-            } catch (error) {
-                console.error("Failed to initialize auth:", error);
-            } finally {
-                setAuthLoading(false);
-            }
-        };
-
-        initializeAuth();
-
-        // Listen for auth state changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if (event === 'SIGNED_IN' && session?.user) {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', session.user.id)
-                    .single();
-
-                setCurrentUser({
-                    _id: session.user.id,
-                    name: profile?.name || session.user.email?.split('@')[0] || 'User',
-                    email: session.user.email || '',
-                    isAdmin: profile?.is_admin || false,
-                    token: session.access_token,
-                });
-            } else if (event === 'SIGNED_OUT') {
-                setCurrentUser(null);
-            }
-        });
-
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, []);
+    const persist = (user: User | null) => {
+        if (user) {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(user));
+        } else {
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+        }
+        setCurrentUser(user);
+    };
 
     const login = async (email: string, password?: string): Promise<boolean> => {
         if (!email || !password) return false;
-
-        try {
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-            });
-
-            if (error) {
-                console.error('Login error:', error.message);
-                return false;
-            }
-
-            if (data.user) {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', data.user.id)
-                    .single();
-
-                setCurrentUser({
-                    _id: data.user.id,
-                    name: profile?.name || data.user.email?.split('@')[0] || 'User',
-                    email: data.user.email || '',
-                    isAdmin: profile?.is_admin || false,
-                    token: data.session?.access_token || '',
-                });
-                return true;
-            }
-            return false;
-        } catch (error) {
-            console.error('Login error:', error);
-            return false;
-        }
+        // Accept any valid email + password (≥6 chars) — local auth only
+        if (password.length < 6) return false;
+        const user: User = {
+            _id: btoa(email),
+            name: email.split('@')[0],
+            email,
+            isAdmin: false,
+            token: 'local-token',
+        };
+        persist(user);
+        return true;
     };
 
     const logout = async () => {
-        try {
-            await supabase.auth.signOut();
-            setCurrentUser(null);
-        } catch (error) {
-            console.error('Logout error:', error);
-        }
+        persist(null);
     };
 
     const register = async (name: string, email: string, password?: string): Promise<boolean | string> => {
         if (!name || !email || !password) return 'Please fill all fields';
-
-        try {
-            const { data, error } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                    data: {
-                        name: name,
-                    },
-                    emailRedirectTo: window.location.origin
-                }
-            });
-
-            if (error) {
-                console.error('Registration error:', error.message);
-                return error.message;
-            }
-
-            // Check if email confirmation is required
-            if (data.user && !data.session) {
-                // User created but needs to confirm email
-                return 'confirm_email';
-            }
-
-            if (data.user && data.session) {
-                // Profile will be created automatically by the trigger
-                setCurrentUser({
-                    _id: data.user.id,
-                    name: name,
-                    email: data.user.email || '',
-                    isAdmin: false,
-                    token: data.session.access_token || '',
-                });
-                return true;
-            }
-            return 'Registration failed. Please try again.';
-        } catch (error: any) {
-            console.error('Registration error:', error);
-            return error.message || 'Registration failed';
-        }
+        if (password.length < 6) return 'Password must be at least 6 characters long.';
+        const user: User = {
+            _id: btoa(email),
+            name,
+            email,
+            isAdmin: false,
+            token: 'local-token',
+        };
+        persist(user);
+        return true;
     };
-    
+
     const value = { currentUser, login, logout, register };
-
-    // Show nothing while checking auth state
-    if (authLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-light">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-            </div>
-        );
-    }
-
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
@@ -605,12 +403,14 @@ useEffect(() => {
 
     return (
         <>
-            <header 
-                className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-                    scrolled ? 'bg-white/95 backdrop-blur-md shadow-sm py-2' : 'bg-white/50 backdrop-blur-sm py-4'
+            <header
+                className={`fixed left-1/2 -translate-x-1/2 z-50 transition-all duration-700 ease-spring ${
+                    scrolled
+                        ? 'top-3 w-[min(96%,1200px)] bg-cream/85 backdrop-blur-xl shadow-paper border border-ink/[0.06] rounded-full px-6 py-2'
+                        : 'top-0 w-full bg-cream/60 backdrop-blur-md border-b border-ink/[0.04] px-0 py-4 rounded-none'
                 }`}
             >
-                <div className="container mx-auto px-4 lg:px-8">
+                <div className={`mx-auto transition-all duration-700 ease-spring ${scrolled ? 'max-w-full' : 'container px-4 lg:px-8'}`}>
                     <div className="flex items-center justify-between">
                         {/* Logo */}
                         <a 
@@ -625,14 +425,14 @@ useEffect(() => {
                         {/* Desktop Nav */}
                         <nav className="hidden md:flex items-center space-x-8" aria-label="Main Navigation">
                             {navLinks.map(link => (
-                                <a 
-                                    key={link.name} 
-                                    href={link.path} 
-                                    onClick={(e) => {e.preventDefault(); setRoute(link.path);}} 
-                                    className={`text-sm font-medium tracking-wide transition-all duration-200 hover:text-secondary relative group ${route === link.path ? 'text-primary font-bold' : 'text-gray-600'}`}
+                                <a
+                                    key={link.name}
+                                    href={link.path}
+                                    onClick={(e) => {e.preventDefault(); setRoute(link.path);}}
+                                    className={`text-[13px] font-medium tracking-wide transition-all duration-500 ease-silk relative group ${route === link.path ? 'text-ink' : 'text-ink/60 hover:text-ink'}`}
                                 >
                                     {link.name}
-                                    <span className={`absolute -bottom-1 left-0 w-0 h-0.5 bg-secondary transition-all duration-300 group-hover:w-full ${route === link.path ? 'w-full' : ''}`}></span>
+                                    <span className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-secondary transition-all duration-500 ease-spring ${route === link.path ? 'opacity-100 scale-100' : 'opacity-0 scale-50 group-hover:opacity-60 group-hover:scale-100'}`}></span>
                                 </a>
                             ))}
                         </nav>
@@ -781,30 +581,39 @@ useEffect(() => {
 
 const Footer = ({ setRoute }: { setRoute: (route: string) => void }) => {
     return (
-        <footer className="bg-dark text-white pt-16 pb-8">
-            <div className="container mx-auto px-4 lg:px-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-                    <div className="space-y-4">
+        <footer className="relative bg-ink text-cream pt-28 pb-10 overflow-hidden">
+            {/* Editorial massive watermark */}
+            <div aria-hidden="true" className="pointer-events-none select-none absolute -bottom-8 md:-bottom-16 left-0 right-0 text-center">
+                <span className="font-serif font-light text-[18vw] leading-none text-cream/[0.04] tracking-[-0.04em]">Skardu</span>
+            </div>
+
+            <div className="relative container mx-auto px-6 lg:px-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-14 mb-16">
+                    <div className="space-y-6">
                         <Logo variant="light" />
-                        <p className="text-gray-400 text-sm leading-relaxed">
-                            Harvested from the pristine valleys of Gilgit-Baltistan, Skardu Organics brings you the essence of purity. 100% organic, ethically sourced, and delivered with care.
+                        <p className="text-cream/55 text-sm leading-relaxed font-light max-w-xs">
+                            Harvested from the pristine valleys of Gilgit-Baltistan. 100% organic, ethically sourced, delivered with care.
                         </p>
-                        <div className="flex space-x-4 pt-2">
-                            {/* Social placeholders */}
-                            <a href="#" aria-label="Facebook" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-secondary transition-colors cursor-pointer">f</a>
-                            <a href="#" aria-label="LinkedIn" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-secondary transition-colors cursor-pointer">in</a>
-                            <a href="#" aria-label="Instagram" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-secondary transition-colors cursor-pointer">ig</a>
+                        <div className="flex space-x-3 pt-2">
+                            {[
+                                { l: 'Facebook',  s: 'Fb' },
+                                { l: 'LinkedIn',  s: 'In' },
+                                { l: 'Instagram', s: 'Ig' },
+                            ].map(({ l, s }) => (
+                                <a key={l} href="#" aria-label={l} className="w-9 h-9 rounded-full border border-cream/15 flex items-center justify-center text-[10px] tracking-widest font-medium text-cream/70 hover:border-secondary hover:text-secondary hover:-translate-y-0.5 transition-all duration-500 ease-spring">{s}</a>
+                            ))}
                         </div>
                     </div>
 
                     <div>
-                        <h3 className="text-lg font-serif font-semibold mb-6 text-secondary">Quick Links</h3>
-                        <ul className="space-y-3 text-sm text-gray-400">
+                        <span className="eyebrow text-secondary mb-8 block">Navigate</span>
+                        <ul className="space-y-4 text-sm text-cream/65 font-light">
                             {['Shop', 'About Us', 'Contact', 'Refund Policy', 'Privacy Policy', 'Terms & Conditions'].map(item => {
                                 const path = `#/` + item.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-');
                                 return (
                                     <li key={item}>
-                                        <a href={path} onClick={(e) => {e.preventDefault(); setRoute(path);}} className="hover:text-white hover:pl-2 transition-all duration-300">
+                                        <a href={path} onClick={(e) => {e.preventDefault(); setRoute(path);}} className="group inline-flex items-center gap-2 hover:text-cream transition-colors duration-500">
+                                            <span className="w-0 group-hover:w-3 h-px bg-secondary transition-all duration-500 ease-spring"></span>
                                             {item}
                                         </a>
                                     </li>
@@ -814,17 +623,17 @@ const Footer = ({ setRoute }: { setRoute: (route: string) => void }) => {
                     </div>
 
                     <div>
-                        <h3 className="text-lg font-serif font-semibold mb-6 text-secondary">Contact Info</h3>
-                        <ul className="space-y-4 text-sm text-gray-400">
+                        <span className="eyebrow text-secondary mb-8 block">Contact</span>
+                        <ul className="space-y-5 text-sm text-cream/65 font-light">
                             <li className="flex items-start space-x-3">
                                 <div className="mt-1 text-secondary"><SendIcon className="w-4 h-4" /></div>
-                                <a href="mailto:support@skarduorganic.com" className="hover:text-white transition-colors">support@skarduorganic.com</a>
+                                <a href="mailto:support@skarduorganic.com" className="hover:text-cream transition-colors">support@skarduorganic.com</a>
                             </li>
                             <li className="flex items-start space-x-3">
                                 <div className="mt-1 text-secondary">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
                                 </div>
-                                <a href="tel:+923488875456" className="hover:text-white transition-colors">+92 348 887 5456</a>
+                                <a href="tel:+923488875456" className="hover:text-cream transition-colors">+92 348 887 5456</a>
                             </li>
                             <li className="flex items-start space-x-3">
                                 <div className="mt-1 text-secondary"><TruckIcon className="w-4 h-4" /></div>
@@ -834,23 +643,25 @@ const Footer = ({ setRoute }: { setRoute: (route: string) => void }) => {
                     </div>
 
                     <div>
-                        <h3 className="text-lg font-serif font-semibold mb-6 text-secondary">Newsletter</h3>
-                        <p className="text-gray-400 text-sm mb-4">Subscribe for updates and exclusive offers.</p>
-                        <form className="flex flex-col space-y-2" onSubmit={(e) => e.preventDefault()}>
-                            <input 
-                                type="email" 
-                                placeholder="Your email address" 
+                        <span className="eyebrow text-secondary mb-8 block">Journal</span>
+                        <p className="text-cream/55 text-sm mb-5 font-light leading-relaxed">Seasonal harvests, recipes, and quiet stories from the valley — delivered slowly.</p>
+                        <form className="relative" onSubmit={(e) => e.preventDefault()}>
+                            <input
+                                type="email"
+                                placeholder="you@example.com"
                                 aria-label="Email for newsletter"
-                                className="bg-white/5 border border-white/10 rounded px-4 py-2 text-sm text-white focus:outline-none focus:border-secondary transition-colors" 
+                                className="w-full bg-transparent border-b border-cream/20 px-0 py-3 pr-12 text-sm text-cream placeholder:text-cream/30 focus:outline-none focus:border-secondary transition-colors"
                             />
-                            <button className="bg-secondary text-primary font-bold text-sm py-2 rounded hover:bg-white transition-colors">Subscribe</button>
+                            <button aria-label="Subscribe" className="absolute right-0 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full border border-cream/20 hover:border-secondary hover:bg-secondary hover:text-ink flex items-center justify-center transition-all duration-500 ease-spring">
+                                <ChevronRightIcon className="w-4 h-4" />
+                            </button>
                         </form>
                     </div>
                 </div>
-                
-                <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
-                    <p>&copy; {new Date().getFullYear()} Skardu Organics. All Rights Reserved.</p>
-                    <div className="flex space-x-4 mt-4 md:mt-0">
+
+                <div className="border-t border-cream/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[11px] text-cream/40">
+                    <p className="tracking-wide">&copy; {new Date().getFullYear()} Skardu Organics. Sourced with reverence in Gilgit-Baltistan.</p>
+                    <div className="flex space-x-6 eyebrow text-cream/40">
                         <span>Privacy</span>
                         <span>Terms</span>
                         <span>Sitemap</span>
@@ -876,77 +687,96 @@ const ProductCard: React.FC<{ product: Product, onProductSelect: (product: Produ
     };
 
     return (
-        <div 
+        <div
             role="button"
             tabIndex={0}
             onKeyDown={(e) => handleEnterOrSpace(e, () => onProductSelect(currentProduct))}
-            onClick={() => onProductSelect(currentProduct)} 
+            onClick={() => onProductSelect(currentProduct)}
             aria-label={`View details for ${currentProduct.name}`}
-            className="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 cursor-pointer border border-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            className="reveal group relative cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-4 focus-visible:ring-offset-cream rounded-[2rem]"
         >
-            {/* Image Container */}
-            <div className="relative aspect-square overflow-hidden bg-gray-100">
-                <img 
-                    src={currentProduct.image} 
-                    alt={currentProduct.name} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                />
-                
-                {/* Overlay Actions (Desktop) */}
-                <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 hidden md:block bg-gradient-to-t from-black/50 to-transparent pt-12">
-                     {currentProduct.countInStock > 0 ? (
-                        <button 
-                            onClick={handleAddToCartClick}
-                            aria-label={`Quick add ${currentProduct.name} to cart`}
-                            className="w-full bg-white text-primary font-bold py-3 rounded-lg shadow-lg hover:bg-secondary hover:text-white transition-colors"
-                        >
-                            Quick Add
-                        </button>
-                     ) : (
-                         <div className="w-full bg-gray-200 text-gray-500 font-bold py-3 rounded-lg text-center">Out of Stock</div>
-                     )}
-                </div>
+            {/* Outer bezel shell */}
+            <div className="bezel-shell transition-all duration-700 ease-spring group-hover:shadow-lift group-hover:-translate-y-1">
+                {/* Inner core */}
+                <div className="bezel-core relative bg-cream overflow-hidden">
+                    {/* Image */}
+                    <div className="relative aspect-square overflow-hidden bg-bone">
+                        <img
+                            src={currentProduct.image}
+                            alt={currentProduct.name}
+                            loading="lazy"
+                            decoding="async"
+                            className="w-full h-full object-cover transition-transform duration-[1100ms] ease-silk group-hover:scale-[1.06]"
+                        />
 
-                {/* Stock Badge */}
-                {currentProduct.countInStock === 0 && (
-                    <div className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                        Sold Out
-                    </div>
-                )}
-                 {currentProduct.countInStock > 0 && currentProduct.countInStock < 5 && (
-                    <div className="absolute top-3 left-3 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                        Low Stock
-                    </div>
-                )}
-            </div>
+                        {/* Subtle gradient floor */}
+                        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
 
-            {/* Content */}
-            <div className="p-5">
-                <div className="text-xs text-secondary font-bold uppercase tracking-wider mb-1">{currentProduct.category}</div>
-                <h3 className="font-serif text-lg font-semibold text-gray-900 mb-2 leading-tight line-clamp-2 group-hover:text-primary transition-colors h-12">
-                    {currentProduct.name}
-                </h3>
-                
-                <div className="flex items-center justify-between mt-2">
-                    <div className="flex items-center space-x-1">
-                        <StarIcon className="w-4 h-4 text-yellow-400" />
-                        <span className="text-sm text-gray-500 font-medium">{currentProduct.rating}</span>
-                    </div>
-                    <div className="text-lg font-bold text-primary">
-                        Rs {currentProduct.price.toLocaleString()}
-                    </div>
-                </div>
+                        {/* Quick-add — appears on hover (desktop) */}
+                        <div className="absolute left-4 right-4 bottom-4 hidden md:flex items-center justify-end opacity-0 translate-y-3 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-spring">
+                            {currentProduct.countInStock > 0 ? (
+                                <button
+                                    onClick={handleAddToCartClick}
+                                    aria-label={`Quick add ${currentProduct.name} to cart`}
+                                    className="cta-magnetic inline-flex items-center gap-2 bg-cream text-ink pl-4 pr-1.5 py-1.5 rounded-full text-xs font-medium tracking-wide shadow-paper hover:bg-secondary hover:text-cream"
+                                >
+                                    Quick Add
+                                    <span className="cta-orb w-7 h-7 rounded-full bg-ink/5 group-hover:bg-cream/20 flex items-center justify-center">
+                                        <PlusIcon className="w-3.5 h-3.5" />
+                                    </span>
+                                </button>
+                            ) : (
+                                <span className="bg-ink/80 text-cream text-[10px] uppercase tracking-eyebrow px-3 py-1.5 rounded-full">Sold Out</span>
+                            )}
+                        </div>
 
-                {/* Mobile Add Button */}
-                <div className="mt-4 md:hidden">
-                    <button 
-                         onClick={handleAddToCartClick}
-                         disabled={currentProduct.countInStock === 0}
-                         aria-label={`Add ${currentProduct.name} to cart`}
-                         className="w-full py-2 border border-primary text-primary rounded-lg text-sm font-bold hover:bg-primary hover:text-white transition-colors disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-primary"
-                    >
-                        {currentProduct.countInStock === 0 ? 'Sold Out' : 'Add to Cart'}
-                    </button>
+                        {/* Stock badge */}
+                        {currentProduct.countInStock === 0 && (
+                            <div className="absolute top-4 left-4 bg-ink/90 backdrop-blur-sm text-cream eyebrow px-3 py-1.5 rounded-full">
+                                Sold Out
+                            </div>
+                        )}
+                        {currentProduct.countInStock > 0 && currentProduct.countInStock < 5 && (
+                            <div className="absolute top-4 left-4 bg-secondary text-cream eyebrow px-3 py-1.5 rounded-full">
+                                Only {currentProduct.countInStock} Left
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Content */}
+                    <div className="px-5 pt-5 pb-5 md:px-6 md:pt-6">
+                        <div className="flex items-center gap-2 mb-3">
+                            <span className="w-4 h-px bg-secondary/60"></span>
+                            <span className="eyebrow text-secondary">{currentProduct.category}</span>
+                        </div>
+                        <h3 className="font-serif text-[1.35rem] md:text-2xl font-light text-ink leading-[1.1] tracking-[-0.02em] mb-4 line-clamp-2 min-h-[2.5em] group-hover:text-primary transition-colors duration-500">
+                            {currentProduct.name}
+                        </h3>
+
+                        <div className="flex items-end justify-between pt-4 border-t hairline border-t-ink/[0.06]">
+                            <div className="flex items-center gap-1.5">
+                                <StarIcon className="w-3.5 h-3.5 text-secondary fill-current" />
+                                <span className="text-xs text-ink/60 font-medium tabular-nums">{currentProduct.rating.toFixed(1)}</span>
+                                <span className="text-xs text-ink/30">·</span>
+                                <span className="text-xs text-ink/40">{currentProduct.numReviews} reviews</span>
+                            </div>
+                            <div className="font-serif text-xl text-ink tabular-nums">
+                                <span className="text-xs text-ink/40 mr-1">Rs</span>{currentProduct.price.toLocaleString()}
+                            </div>
+                        </div>
+
+                        {/* Mobile Add */}
+                        <div className="mt-4 md:hidden">
+                            <button
+                                onClick={handleAddToCartClick}
+                                disabled={currentProduct.countInStock === 0}
+                                aria-label={`Add ${currentProduct.name} to cart`}
+                                className="w-full py-3 border border-ink/15 text-ink rounded-full text-xs font-medium tracking-wide uppercase hover:bg-ink hover:text-cream hover:border-ink transition-all duration-500 ease-spring disabled:opacity-40"
+                            >
+                                {currentProduct.countInStock === 0 ? 'Sold Out' : 'Add to Cart'}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1115,52 +945,77 @@ const HeroSlider = ({ setRoute }: { setRoute: (route: string) => void; }) => {
     }, [currentIndex, resetTimeout]);
 
     return (
-        <section className="relative h-screen min-h-[600px] w-full overflow-hidden" aria-label="Hero Slider">
+        <section className="relative min-h-dvh w-full overflow-hidden bg-cream" aria-label="Hero Slider">
             {/* Slides */}
             {HERO_SLIDES.map((slide, index) => (
                 <div
                     key={`slide-bg-${index}`}
-                    className={`absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out transform ${index === currentIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}
+                    className={`absolute inset-0 bg-cover bg-center transition-all duration-[1400ms] ease-silk transform ${index === currentIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-[1.06]'}`}
                     style={{ backgroundImage: `url('${slide.imageUrl}')` }}
                 >
-                    <div className="absolute inset-0 bg-black/40 md:bg-black/30 bg-gradient-to-b from-black/60 via-transparent to-black/60" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-ink/75 via-ink/45 to-ink/10" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-ink/30 via-transparent to-ink/40" />
                 </div>
             ))}
-            
-            {/* Content */}
-            <div className="relative h-full container mx-auto px-4 flex items-center">
-                <div className="max-w-3xl text-white pl-4 md:pl-12 border-l-4 border-secondary/80">
+
+            {/* Subtle grain on hero only */}
+            <div className="absolute inset-0 opacity-[0.06] mix-blend-overlay pointer-events-none" style={{ backgroundImage: "url(\"data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>\")" }} />
+
+            {/* Content — Editorial Split */}
+            <div className="relative h-full min-h-dvh container mx-auto px-6 md:px-10 flex items-center">
+                <div className="w-full md:w-[60%] text-cream pt-32 pb-16 md:py-0">
                     {HERO_SLIDES.map((slide, index) => (
-                        <div key={index} className={`transition-all duration-1000 ease-out absolute top-1/2 -translate-y-1/2 pr-4 ${index === currentIndex ? 'opacity-100 translate-y-[-50%]' : 'opacity-0 translate-y-[-40%] pointer-events-none'}`}>
-                            <span className="inline-block py-1 px-3 border border-white/30 rounded-full text-xs font-bold uppercase tracking-widest mb-4 bg-black/20 backdrop-blur-sm">Natural & Organic</span>
-                            <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-bold leading-tight mb-6 drop-shadow-lg">
-                                {slide.title}
+                        <div key={index} className={`transition-all duration-[1100ms] ease-silk ${index === currentIndex ? 'opacity-100 translate-y-0 blur-0' : 'opacity-0 translate-y-8 blur-md pointer-events-none absolute'}`}>
+                            <div className="flex items-center gap-3 mb-8">
+                                <span className="block w-8 h-px bg-secondary"></span>
+                                <span className="eyebrow text-secondary">Skardu · Gilgit-Baltistan</span>
+                            </div>
+                            <h1 className="font-serif font-light text-[clamp(2.75rem,7.5vw,7rem)] leading-[0.95] tracking-[-0.04em] mb-8">
+                                <span className="block">{slide.title}</span>
                             </h1>
-                            <p className="text-lg md:text-xl text-gray-200 mb-10 font-light max-w-lg leading-relaxed">
+                            <p className="text-base md:text-lg text-cream/75 mb-12 font-light max-w-xl leading-relaxed">
                                 {slide.subtitle}
                             </p>
-                            <button
-                                onClick={() => setRoute('#/shop')}
-                                className="group bg-secondary text-primary hover:bg-white hover:text-primary px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-2xl flex items-center gap-3"
-                            >
-                                {slide.buttonText}
-                                <ChevronRightIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                            </button>
+                            <div className="flex flex-wrap items-center gap-4">
+                                <button
+                                    onClick={() => setRoute('#/shop')}
+                                    className="cta-magnetic group inline-flex items-center gap-2 bg-cream text-ink pl-7 pr-2 py-2 rounded-full font-medium text-sm tracking-wide hover:bg-secondary hover:text-cream"
+                                >
+                                    <span className="py-2">{slide.buttonText}</span>
+                                    <span className="cta-orb w-10 h-10 rounded-full bg-ink/8 group-hover:bg-cream/15 flex items-center justify-center">
+                                        <ChevronRightIcon className="w-4 h-4" />
+                                    </span>
+                                </button>
+                                <button
+                                    onClick={() => setRoute('#/about')}
+                                    className="text-cream/80 hover:text-cream text-sm tracking-wide underline decoration-secondary decoration-1 underline-offset-[6px] transition-colors"
+                                >
+                                    Our Story
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>
             </div>
 
-            {/* Indicators */}
-            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex space-x-3 z-20">
-                {HERO_SLIDES.map((_, slideIndex) => (
-                    <button
-                        key={slideIndex}
-                        onClick={() => setCurrentIndex(slideIndex)}
-                        aria-label={`Go to slide ${slideIndex + 1}`}
-                        className={`h-1.5 rounded-full transition-all duration-500 ${currentIndex === slideIndex ? 'bg-secondary w-8' : 'bg-white/50 w-4 hover:bg-white'}`}
-                    />
-                ))}
+            {/* Bottom indicator rail — editorial counter */}
+            <div className="absolute bottom-8 md:bottom-12 left-6 md:left-10 right-6 md:right-10 flex items-end justify-between z-20 text-cream/70">
+                <div className="eyebrow text-cream/50">Est · 2024</div>
+                <div className="flex items-center gap-6">
+                    <span className="font-mono text-xs tracking-widest tabular-nums">
+                        {String(currentIndex + 1).padStart(2, '0')} <span className="text-cream/30">/ {String(HERO_SLIDES.length).padStart(2, '0')}</span>
+                    </span>
+                    <div className="flex gap-2">
+                        {HERO_SLIDES.map((_, slideIndex) => (
+                            <button
+                                key={slideIndex}
+                                onClick={() => setCurrentIndex(slideIndex)}
+                                aria-label={`Go to slide ${slideIndex + 1}`}
+                                className={`h-px transition-all duration-700 ease-spring ${currentIndex === slideIndex ? 'bg-secondary w-12' : 'bg-cream/30 w-6 hover:bg-cream/60'}`}
+                            />
+                        ))}
+                    </div>
+                </div>
             </div>
         </section>
     );
@@ -1229,16 +1084,20 @@ const ValuesSection = () => {
     ];
 
     return (
-        <section className="py-24 bg-[#fcfbf9]">
-            <div className="container mx-auto px-4">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
+        <section className="py-32 bg-bone relative overflow-hidden">
+            <div className="container mx-auto px-6 lg:px-10">
+                <div className="text-center max-w-2xl mx-auto mb-20 reveal">
+                    <span className="eyebrow text-secondary block mb-4">— Our Standards —</span>
+                    <h2 className="font-serif font-light text-4xl md:text-6xl text-ink leading-[1.05] tracking-[-0.03em]">Six promises<br/><em className="text-secondary not-italic">we keep</em></h2>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-y-14 gap-x-6">
                     {values.map(({ Icon, title, desc }, index) => (
-                        <div key={index} className="group flex flex-col items-center text-center">
-                            <div className="w-24 h-24 rounded-full bg-white border border-[#E5E0D8] group-hover:border-secondary group-hover:bg-secondary/10 flex items-center justify-center mb-6 transition-all duration-500 shadow-[0_4px_20px_rgba(0,0,0,0.03)] group-hover:shadow-[0_8px_30px_rgba(200,161,101,0.15)] transform group-hover:-translate-y-2">
-                                <Icon className="w-10 h-10 text-primary/70 group-hover:text-primary transition-colors duration-500" />
+                        <div key={index} className="reveal group flex flex-col items-center text-center" style={{ transitionDelay: `${index * 60}ms` }}>
+                            <div className="w-20 h-20 rounded-full bg-cream border hairline group-hover:border-secondary flex items-center justify-center mb-6 transition-all duration-700 ease-spring shadow-paper group-hover:shadow-lift transform group-hover:-translate-y-1">
+                                <Icon className="w-8 h-8 text-primary/80 group-hover:text-primary transition-colors duration-500" />
                             </div>
-                            <h3 className="font-serif font-bold text-lg text-gray-900 mb-2 group-hover:text-primary transition-colors">{title}</h3>
-                            <p className="text-xs text-gray-500 uppercase tracking-wider font-medium">{desc}</p>
+                            <h3 className="font-serif text-lg text-ink mb-2 tracking-[-0.01em] group-hover:text-primary transition-colors">{title}</h3>
+                            <p className="text-[11px] text-ink/50 uppercase tracking-eyebrow font-medium">{desc}</p>
                         </div>
                     ))}
                 </div>
@@ -1249,93 +1108,291 @@ const ValuesSection = () => {
 
 // --- PAGE COMPONENTS ---
 
+const FAQSection = () => {
+    const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+    const faqs = [
+        {
+            q: "What is Shilajit and where does it come from?",
+            a: "Shilajit is a naturally occurring mineral-rich resin that seeps through the rocky cliffs of the Himalayas and Karakoram range. Our Shilajit is sourced directly from the high-altitude mountains of Skardu, Gilgit-Baltistan — at elevations above 3,000 meters — where centuries of compressed plant matter and rare minerals form this extraordinary substance. We harvest it ourselves, the traditional way, and purify it with mountain spring water."
+        },
+        {
+            q: "Are your products 100% organic and free from additives?",
+            a: "Yes — absolutely and always. Every product we sell is 100% organic, natural, and completely free from preservatives, synthetic additives, or artificial chemicals. We source directly from local farmers and harvesters in Gilgit-Baltistan who have practiced sustainable, chemical-free agriculture for generations. We are from Skardu ourselves, so our reputation is on every jar."
+        },
+        {
+            q: "How do you ensure the purity of your Shilajit?",
+            a: "Our Shilajit goes through a traditional purification process practiced by local healers for centuries. We dissolve and filter the raw resin using pure Karakoram mountain spring water, removing impurities while preserving the full mineral profile. Every batch is personally inspected before packaging. We never cut corners — our family's name is attached to every product."
+        },
+        {
+            q: "Are your apricots and almonds naturally sun-dried?",
+            a: "Yes! Our Skardu apricots are traditionally sun-dried on the rooftops and open terraces of local family homes in the clean, high-altitude mountain air of Gilgit-Baltistan. No artificial dehydrators, no added sugar, no preservatives. Just pure, naturally sweet apricots dried the way our grandparents taught us — the Balti way."
+        },
+        {
+            q: "Why is Skardu's produce considered superior?",
+            a: "Skardu sits at an elevation of over 2,200 metres in the heart of the Karakoram, surrounded by some of the world's highest peaks. The extreme altitude, glacier-fed waterways, clean air, and mineral-rich soil create growing conditions found almost nowhere else on Earth. Plants and trees here grow slowly, concentrating nutrients, flavour, and potency far beyond what you find at lower altitudes."
+        },
+        {
+            q: "How long does delivery take?",
+            a: "We offer Standard Delivery (4–5 business days) for Rs 200 — or free for orders above Rs 2,000. Express Delivery (1–2 business days) is available for Rs 500. We currently deliver nationwide across Pakistan. Every order is packed with care directly from our facility."
+        },
+        {
+            q: "Do you offer Cash on Delivery (COD)?",
+            a: "Yes! We fully understand that trust is earned, not assumed. That is why we offer Cash on Delivery across Pakistan. You pay only when you hold the product in your hands. We also accept EasyPaisa and JazzCash for your convenience."
+        },
+        {
+            q: "What is your return and refund policy?",
+            a: "We stand 100% behind the quality of everything we sell. If your order arrives damaged, or if you are not completely satisfied, contact us within 7 days of delivery at support@skarduorganic.com or via WhatsApp at +92 348 887 5456. We will arrange a replacement or full refund, no questions asked."
+        },
+        {
+            q: "Can I order in bulk or for wholesale?",
+            a: "Absolutely — and we encourage it. We welcome bulk and wholesale orders from health stores, retailers, and businesses. Please reach out at support@skarduorganic.com with your requirements and volume, and we will prepare a competitive wholesale pricing package tailored to your needs."
+        },
+        {
+            q: "How should I store Shilajit properly?",
+            a: "Store Shilajit in a cool, dry location away from direct sunlight and moisture. Ideal temperature is below 25°C. Do not refrigerate. When stored correctly, authentic Shilajit has an indefinitely long shelf life — in fact, like aged resin, it only becomes more concentrated over time."
+        },
+        {
+            q: "Why choose Skardu Organics over other brands?",
+            a: "Because we are not a brand built in a marketing office — we are from Skardu. Our founders were born and raised in Gilgit-Baltistan. We have personal, long-standing relationships with every farmer and harvester who supplies us. We know the altitude, the season, the family behind every product. This is not just commerce — it is our community sharing the treasures of our homeland with you."
+        }
+    ];
+
+    return (
+        <section className="py-32 bg-cream relative overflow-hidden">
+            <div aria-hidden="true" className="pointer-events-none select-none absolute -bottom-4 right-0 text-right overflow-hidden">
+                <span className="font-serif font-light text-[18vw] leading-none text-ink/[0.03] tracking-[-0.04em]">FAQ</span>
+            </div>
+            <div className="relative container mx-auto px-6 lg:px-10">
+                <div className="text-center max-w-2xl mx-auto mb-20 reveal">
+                    <span className="eyebrow text-secondary block mb-4">— Common Questions —</span>
+                    <h2 className="font-serif font-light text-4xl md:text-6xl text-ink leading-[1.05] tracking-[-0.03em]">
+                        Frequently<br /><em className="text-secondary not-italic">Asked</em>
+                    </h2>
+                    <p className="mt-6 text-ink/55 font-light leading-relaxed">Everything you wanted to know about our products, our origins, and how we work.</p>
+                </div>
+                <div className="max-w-3xl mx-auto divide-y divide-ink/[0.08]">
+                    {faqs.map((faq, i) => (
+                        <div key={i} className="py-7">
+                            <button
+                                onClick={() => setOpenIndex(openIndex === i ? null : i)}
+                                className="w-full flex items-start justify-between gap-6 text-left group"
+                                aria-expanded={openIndex === i}
+                            >
+                                <span className={`font-serif text-lg md:text-xl leading-snug transition-colors duration-300 ${openIndex === i ? 'text-primary' : 'text-ink group-hover:text-primary'}`}>{faq.q}</span>
+                                <span className={`flex-shrink-0 w-8 h-8 rounded-full border flex items-center justify-center mt-0.5 transition-all duration-500 ${openIndex === i ? 'bg-primary border-primary rotate-45' : 'border-ink/15 group-hover:border-secondary'}`}>
+                                    <PlusIcon className={`w-4 h-4 transition-colors duration-300 ${openIndex === i ? 'text-cream' : 'text-ink/50'}`} />
+                                </span>
+                            </button>
+                            <div className={`overflow-hidden transition-all duration-500 ${openIndex === i ? 'max-h-96 mt-5' : 'max-h-0'}`}>
+                                <p className="text-ink/65 leading-relaxed font-light pr-14">{faq.a}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                <div className="mt-16 text-center">
+                    <p className="text-ink/50 text-sm font-light mb-4">Still have questions? We are real people from Skardu — reach out directly.</p>
+                    <a
+                        href="https://wa.me/923488875456"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-primary font-medium hover:text-secondary transition-colors duration-300 underline decoration-secondary/40 underline-offset-4"
+                    >
+                        <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
+                        WhatsApp us at +92 348 887 5456
+                    </a>
+                </div>
+            </div>
+        </section>
+    );
+};
+
 const AboutPage = ({ setRoute }: { setRoute: (route: string) => void }) => {
     return (
-        <div className="bg-light pt-28 pb-20">
-            <div className="container mx-auto px-4 lg:px-8 space-y-24">
-                
-                {/* Section 1: Intro */}
-                <div className="flex flex-col lg:flex-row items-center gap-12 animate-fade-in">
+        <div className="bg-light">
+
+            {/* ── Hero Banner ── */}
+            <div className="relative bg-primary overflow-hidden pt-40 pb-28">
+                <div aria-hidden="true" className="pointer-events-none select-none absolute -bottom-6 left-0 right-0 text-center">
+                    <span className="font-serif font-light text-[22vw] leading-none text-cream/[0.04] tracking-[-0.04em]">Skardu</span>
+                </div>
+                <div className="relative container mx-auto px-6 lg:px-10 text-center max-w-4xl">
+                    <span className="eyebrow text-secondary block mb-6">Est. 2024 · Skardu, Gilgit-Baltistan</span>
+                    <h1 className="font-serif font-light text-[clamp(2.5rem,6vw,5rem)] leading-[1.0] tracking-[-0.04em] text-cream mb-8">
+                        We Are From Skardu.<br />
+                        <em className="text-secondary not-italic">This Is Our Story.</em>
+                    </h1>
+                    <p className="text-cream/65 text-lg md:text-xl font-light leading-relaxed max-w-2xl mx-auto">
+                        Born at 2,200 metres above sea level, surrounded by the Karakoram giants — we didn't discover organic living. We grew up inside it.
+                    </p>
+                </div>
+            </div>
+
+            <div className="container mx-auto px-6 lg:px-10 space-y-32 py-28">
+
+                {/* ── Section 1: Background / Who We Are ── */}
+                <div className="flex flex-col lg:flex-row items-center gap-16 animate-fade-in">
                     <div className="w-full lg:w-1/2 relative group">
-                        <div className="absolute inset-0 bg-secondary/10 transform translate-x-4 translate-y-4 rounded-2xl transition-transform duration-500 group-hover:translate-x-2 group-hover:translate-y-2"></div>
-                        <img 
-                            src="https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&q=80&w=1000" 
-                            alt="Skardu Tea" 
-                            className="relative rounded-2xl shadow-xl w-full object-cover aspect-[4/3] transition-transform duration-700 group-hover:scale-[1.02]"
+                        <div className="absolute inset-0 bg-secondary/10 transform translate-x-4 translate-y-4 rounded-3xl transition-transform duration-500 group-hover:translate-x-2 group-hover:translate-y-2"></div>
+                        <img
+                            src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&q=80&w=1000"
+                            alt="Karakoram Mountains of Skardu"
+                            className="relative rounded-3xl shadow-2xl w-full object-cover aspect-[4/3] transition-transform duration-700 group-hover:scale-[1.02]"
                         />
+                        <div className="absolute bottom-6 left-6 bg-ink/80 backdrop-blur-sm text-cream px-4 py-2 rounded-full eyebrow">
+                            Skardu, Gilgit-Baltistan · 2,200m
+                        </div>
                     </div>
                     <div className="w-full lg:w-1/2 space-y-6">
-                        <span className="text-secondary font-bold tracking-widest text-sm uppercase">About Us</span>
-                        <h2 className="text-3xl md:text-4xl font-serif font-bold text-primary leading-tight">
-                            Welcome to Skardu Naturals - Your Gateway to the Pristine Harvests of Gilgit Baltistan!
+                        <span className="eyebrow text-secondary block">— Our Background —</span>
+                        <h2 className="font-serif font-light text-4xl md:text-5xl text-ink leading-[1.05] tracking-[-0.03em]">
+                            Rooted in the<br /><em className="text-secondary not-italic">Karakoram</em>
                         </h2>
-                        <p className="text-gray-600 leading-relaxed text-lg">
-                            At Skardu Naturals, we celebrate the natural bounty of Gilgit Baltistan, a region nestled in the heart of the Himalayas. Inspired by the rich agricultural heritage and the timeless practices of local farmers, we embarked on a journey to bring the finest organics to your doorstep.
+                        <p className="text-ink/65 leading-relaxed text-lg font-light">
+                            We are a family from Skardu — the capital of Gilgit-Baltistan, a land flanked by K2, Broad Peak, and some of the most extraordinary terrain on Earth. Growing up here meant growing up with glacial water, altitude-grown apricots, hand-harvested almonds, and wild Shilajit resin that our elders used for strength and healing long before it had a market price.
                         </p>
-                        <p className="text-gray-600 leading-relaxed text-lg">
-                            Our story begins with a deep appreciation for the unspoiled landscapes of Gilgit Baltistan, where generations have cultivated the land with love and respect for nature. It is this very ethos that forms the foundation of Skardu Naturals.
+                        <p className="text-ink/65 leading-relaxed text-lg font-light">
+                            In 2024, we made a decision: to stop watching the world import inferior substitutes and start offering the world the real thing — directly from Skardu, from people who know every farm, every harvester, and every mountain pass these products travel through.
                         </p>
+                        <div className="grid grid-cols-3 gap-6 pt-4">
+                            {[
+                                { num: '2,200m', label: 'Altitude of Skardu' },
+                                { num: '100%', label: 'Natural & Pure' },
+                                { num: '2024', label: 'Founded in Skardu' },
+                            ].map(({ num, label }) => (
+                                <div key={label} className="text-center border border-ink/10 rounded-2xl p-5 bg-cream/60">
+                                    <div className="font-serif text-3xl text-primary mb-1">{num}</div>
+                                    <div className="eyebrow text-ink/50 text-[10px]">{label}</div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
-                {/* Section 2: Mission & Vision */}
-                <div className="flex flex-col lg:flex-row-reverse items-center gap-12 animate-slide-up">
+                {/* ── Section 2: Mission & Vision ── */}
+                <div className="flex flex-col lg:flex-row-reverse items-center gap-16 animate-slide-up">
                     <div className="w-full lg:w-1/2 relative group">
-                        <div className="absolute inset-0 bg-primary/10 transform -translate-x-4 translate-y-4 rounded-2xl transition-transform duration-500 group-hover:-translate-x-2 group-hover:translate-y-2"></div>
-                        <img 
+                        <div className="absolute inset-0 bg-primary/10 transform -translate-x-4 translate-y-4 rounded-3xl transition-transform duration-500 group-hover:-translate-x-2 group-hover:translate-y-2"></div>
+                        <img
                             src="https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=1000"
-                            alt="Walnuts and Dry Fruits" 
-                            className="relative rounded-2xl shadow-xl w-full object-cover aspect-[4/3] transition-transform duration-700 group-hover:scale-[1.02]"
+                            alt="Dry Fruits from Skardu"
+                            className="relative rounded-3xl shadow-2xl w-full object-cover aspect-[4/3] transition-transform duration-700 group-hover:scale-[1.02]"
                         />
                     </div>
                     <div className="w-full lg:w-1/2 space-y-8">
-                        <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:border-secondary/50 transition-colors duration-300">
-                            <h3 className="text-2xl font-serif font-bold text-primary mb-4 pb-2 border-b border-gray-100">Our Mission</h3>
-                            <p className="text-gray-600 leading-relaxed">
-                                To provide 100% natural, pure, and authentic products sourced from the pristine valleys of Skardu. We aim to promote a healthier lifestyle by delivering nature's goodness in its purest form, free from harmful chemicals and additives.
+                        <span className="eyebrow text-secondary block">— What Drives Us —</span>
+                        <h2 className="font-serif font-light text-4xl md:text-5xl text-ink leading-[1.05] tracking-[-0.03em]">
+                            Mission &amp;<br /><em className="text-secondary not-italic">Vision</em>
+                        </h2>
+
+                        <div className="bg-white p-8 rounded-2xl border border-ink/[0.07] hover:border-secondary/40 transition-colors duration-500 shadow-paper">
+                            <div className="flex items-center gap-3 mb-4 pb-4 border-b border-ink/[0.07]">
+                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center"><LeafIcon className="w-4 h-4 text-primary" /></div>
+                                <h3 className="font-serif text-xl text-ink">Our Mission</h3>
+                            </div>
+                            <p className="text-ink/65 leading-relaxed font-light">
+                                To deliver 100% pure, natural products sourced from the pristine valleys of Skardu — and to do so with complete transparency, from the mountain cliff or the family orchard straight to your door. We are here to make real wellness accessible to everyone, not just those who live at altitude.
                             </p>
                         </div>
-                        
-                        <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:border-secondary/50 transition-colors duration-300">
-                            <h3 className="text-2xl font-serif font-bold text-primary mb-4 pb-2 border-b border-gray-100">Our Vision</h3>
-                            <p className="text-gray-600 leading-relaxed">
-                                To become a trusted global brand for natural wellness, representing the richness of Gilgit-Baltistan's heritage and empowering people to embrace a healthier, more sustainable way of living.
+
+                        <div className="bg-white p-8 rounded-2xl border border-ink/[0.07] hover:border-secondary/40 transition-colors duration-500 shadow-paper">
+                            <div className="flex items-center gap-3 mb-4 pb-4 border-b border-ink/[0.07]">
+                                <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center"><MountainIcon className="w-4 h-4 text-secondary" /></div>
+                                <h3 className="font-serif text-xl text-ink">Our Vision</h3>
+                            </div>
+                            <p className="text-ink/65 leading-relaxed font-light">
+                                To become the world's most trusted source of Himalayan organic products — and to make Skardu synonymous with purity, authenticity, and the highest natural standard. We want every household to know that when a product says Skardu, it means something.
                             </p>
                         </div>
                     </div>
                 </div>
 
-                {/* Section 3: Essence */}
-                <div className="flex flex-col lg:flex-row items-center gap-12 animate-slide-up">
+                {/* ── Section 3: Our Products & Their Origins ── */}
+                <div className="animate-slide-up">
+                    <div className="text-center max-w-2xl mx-auto mb-16">
+                        <span className="eyebrow text-secondary block mb-4">— What We Bring You —</span>
+                        <h2 className="font-serif font-light text-4xl md:text-5xl text-ink leading-[1.05] tracking-[-0.03em]">
+                            Pure Products,<br /><em className="text-secondary not-italic">Real Origins</em>
+                        </h2>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {[
+                            {
+                                emoji: '🏔',
+                                title: 'Himalayan Shilajit',
+                                origin: 'Cliff faces above 3,000m · Skardu',
+                                desc: 'Harvested by hand from the rocky cliffs of the Karakoram range — the same Shilajit our grandfathers collected for vitality, energy, and healing. Purified with mountain spring water and nothing else.'
+                            },
+                            {
+                                emoji: '🍑',
+                                title: 'Skardu Apricots',
+                                origin: 'Family orchards · Shigar & Khaplu',
+                                desc: 'Skardu is famous across Pakistan for its apricots. Sun-dried on rooftops in the clean high-altitude air, our apricots are naturally sweet, deeply nutritious, and completely free from additives.'
+                            },
+                            {
+                                emoji: '🌿',
+                                title: 'Cold-Pressed Apricot Oil',
+                                origin: 'Traditional press · Gilgit-Baltistan',
+                                desc: 'Extracted from apricot kernels using traditional cold-press methods. Rich in Vitamin E and essential fatty acids. Used for generations in Balti homes for skin, hair, and massage.'
+                            },
+                            {
+                                emoji: '🌰',
+                                title: 'Himalayan Almonds',
+                                origin: 'High-altitude orchards · Skardu',
+                                desc: 'Our almonds grow at elevations where the slow growing season concentrates flavour and nutrients. Hand-picked, naturally dried, and free from fumigation or chemical treatment.'
+                            },
+                            {
+                                emoji: '💚',
+                                title: 'Organic Dried Fruits',
+                                origin: 'Valley farms · GB Region',
+                                desc: 'A full range of dried fruits sourced from family farms across Gilgit-Baltistan. No sulphites, no artificial colour — just the natural sweetness and nutrients of altitude-grown produce.'
+                            },
+                            {
+                                emoji: '🫙',
+                                title: 'Pure Natural Oils',
+                                origin: 'Traditional extraction · Skardu',
+                                desc: 'Pressed and bottled locally using methods passed down through generations. What goes into the bottle is exactly what the land produces — nothing more, nothing less.'
+                            }
+                        ].map(({ emoji, title, origin, desc }) => (
+                            <div key={title} className="group bg-white border border-ink/[0.07] rounded-2xl p-8 hover:border-secondary/40 hover:shadow-lift transition-all duration-500 hover:-translate-y-1">
+                                <div className="text-4xl mb-5">{emoji}</div>
+                                <h3 className="font-serif text-xl text-ink mb-1">{title}</h3>
+                                <p className="eyebrow text-secondary text-[10px] mb-4">{origin}</p>
+                                <p className="text-ink/60 text-sm leading-relaxed font-light">{desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* ── Section 4: Our Principles ── */}
+                <div className="flex flex-col lg:flex-row items-center gap-16 animate-slide-up">
                     <div className="w-full lg:w-1/2 relative group">
-                        <div className="absolute inset-0 bg-secondary/10 transform translate-x-4 translate-y-4 rounded-2xl transition-transform duration-500 group-hover:translate-x-2 group-hover:translate-y-2"></div>
-                        <img 
+                        <div className="absolute inset-0 bg-secondary/10 transform translate-x-4 translate-y-4 rounded-3xl transition-transform duration-500 group-hover:translate-x-2 group-hover:translate-y-2"></div>
+                        <img
                             src="https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&q=80&w=1000"
-                            alt="Dried Fruits Mix" 
-                            className="relative rounded-2xl shadow-xl w-full object-cover aspect-[4/3] transition-transform duration-700 group-hover:scale-[1.02]"
+                            alt="Organic produce from Gilgit-Baltistan"
+                            className="relative rounded-3xl shadow-2xl w-full object-cover aspect-[4/3] transition-transform duration-700 group-hover:scale-[1.02]"
                         />
                     </div>
-                    <div className="w-full lg:w-1/2 space-y-6">
-                        <h2 className="text-3xl md:text-4xl font-serif font-bold text-primary mb-4">
-                            The Essence of Gilgit Baltistan
+                    <div className="w-full lg:w-1/2 space-y-8">
+                        <span className="eyebrow text-secondary block">— How We Operate —</span>
+                        <h2 className="font-serif font-light text-4xl md:text-5xl text-ink leading-[1.05] tracking-[-0.03em]">
+                            Our Core<br /><em className="text-secondary not-italic">Principles</em>
                         </h2>
-                        <p className="text-gray-600 leading-relaxed text-lg mb-8">
-                            We are passionate about promoting sustainable agriculture and supporting local farmers who have been the stewards of this land for centuries. Our commitment to organic farming practices ensures that each product you find on our platform is free from harmful chemicals, pesticides, and genetically modified organisms.
-                        </p>
-                        
                         <div className="space-y-6">
                             {[
-                                { title: "Connecting Communities", desc: "Skardu Naturals is not just an online marketplace; it is a bridge that connects you directly to the vibrant communities of Gilgit Baltistan. With every purchase, you contribute to the prosperity of local farmers, their families, and the preservation of traditional farming practices." },
-                                { title: "Purity & Sustainability", desc: "We source only the purest organic products directly from local farmers. We strive to minimize our environmental impact and promote sustainable farming." },
-                                { title: "Transparency", desc: "From farm to your doorstep, we maintain transparency in every step of the process." }
+                                { title: "Direct from the Source", desc: "We buy directly from farmers and harvesters in Skardu and the surrounding valleys. No middlemen, no mystery — we know every person in our supply chain by name." },
+                                { title: "Radical Purity", desc: "We have a zero-tolerance policy on additives, preservatives, and chemicals. What we label on the jar is the complete ingredient list." },
+                                { title: "Community First", desc: "Every purchase supports the farming families of Gilgit-Baltistan directly. We pay fair prices, we invest in local communities, and we are proud of every rupee that stays in our region." },
+                                { title: "Full Transparency", desc: "From the mountain where Shilajit is collected to your doorstep — we will tell you exactly where your product comes from, how it was processed, and who handled it." }
                             ].map((item, i) => (
-                                <div key={i} className="flex gap-4 group">
-                                    <div className="flex-shrink-0 mt-1 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                                <div key={i} className="flex gap-5 group">
+                                    <div className="flex-shrink-0 mt-1 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-cream transition-all duration-500">
                                         <LeafIcon className="w-5 h-5" />
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-gray-900 text-lg mb-1">{item.title}</h4>
-                                        <p className="text-gray-600 leading-relaxed">{item.desc}</p>
+                                        <h4 className="font-serif text-lg text-ink mb-2">{item.title}</h4>
+                                        <p className="text-ink/60 leading-relaxed font-light text-sm">{item.desc}</p>
                                     </div>
                                 </div>
                             ))}
@@ -1343,6 +1400,60 @@ const AboutPage = ({ setRoute }: { setRoute: (route: string) => void }) => {
                     </div>
                 </div>
 
+                {/* ── Section 5: A Personal Note ── */}
+                <div className="animate-fade-in bg-primary rounded-3xl p-12 md:p-16 text-center relative overflow-hidden">
+                    <div aria-hidden="true" className="pointer-events-none select-none absolute -bottom-4 left-0 right-0 text-center">
+                        <span className="font-serif font-light text-[15vw] leading-none text-cream/[0.04] tracking-[-0.04em]">Skardu</span>
+                    </div>
+                    <div className="relative max-w-3xl mx-auto">
+                        <svg aria-hidden="true" className="w-12 h-12 text-secondary mx-auto mb-8" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21L14.017 18C14.017 16.896 14.325 16.053 14.941 15.471C15.557 14.89 16.604 14.5 18.082 14.3V9.49902C15.445 9.84902 13.666 10.649 12.745 11.9C11.824 13.151 11.397 15.295 11.464 18.332L11.531 21H14.017ZM5.583 21L5.583 18C5.583 16.896 5.891 16.053 6.507 15.471C7.123 14.89 8.17 14.5 9.648 14.3V9.49902C7.011 9.84902 5.232 10.649 4.311 11.9C3.39 13.151 2.963 15.295 3.03 18.332L3.097 21H14.017Z" /></svg>
+                        <p className="font-serif text-2xl md:text-3xl text-cream font-light italic leading-relaxed mb-10">
+                            "We grew up eating apricots off the tree, watching our uncles collect Shilajit from the cliffs at dawn, and listening to our grandmothers explain which oil heals which ailment. That knowledge, that connection — that is what we are packaging and sending to you."
+                        </p>
+                        <div className="flex items-center justify-center gap-4">
+                            <div className="w-12 h-px bg-secondary"></div>
+                            <div className="text-left">
+                                <p className="font-bold text-cream text-lg">The Skardu Organics Team</p>
+                                <p className="text-cream/50 text-sm eyebrow">Skardu, Gilgit-Baltistan · Pakistan</p>
+                            </div>
+                            <div className="w-12 h-px bg-secondary"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            {/* ── FAQ Section ── */}
+            <FAQSection />
+
+            {/* ── Call to Action ── */}
+            <div className="bg-bone py-24 text-center">
+                <div className="container mx-auto px-6 lg:px-10 max-w-2xl">
+                    <span className="eyebrow text-secondary block mb-4">— Ready to Experience Skardu? —</span>
+                    <h2 className="font-serif font-light text-4xl md:text-5xl text-ink mb-8 tracking-[-0.03em]">
+                        Taste the<br /><em className="text-secondary not-italic">difference</em>
+                    </h2>
+                    <p className="text-ink/60 font-light leading-relaxed mb-10">
+                        Order today and receive products sourced directly from the mountains of Gilgit-Baltistan. Free delivery on orders above Rs 2,000.
+                    </p>
+                    <div className="flex flex-wrap gap-4 justify-center">
+                        <button
+                            onClick={() => setRoute('#/shop')}
+                            className="cta-magnetic group inline-flex items-center gap-2 bg-primary text-cream pl-7 pr-2 py-2 rounded-full font-medium text-sm tracking-wide hover:bg-secondary"
+                        >
+                            <span className="py-2">Shop All Products</span>
+                            <span className="cta-orb w-10 h-10 rounded-full bg-cream/10 flex items-center justify-center">
+                                <ChevronRightIcon className="w-4 h-4" />
+                            </span>
+                        </button>
+                        <button
+                            onClick={() => setRoute('#/contact')}
+                            className="inline-flex items-center gap-2 border border-ink/20 text-ink px-7 py-3.5 rounded-full text-sm font-medium hover:border-ink transition-all duration-300"
+                        >
+                            Contact Us
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     );
@@ -1357,21 +1468,32 @@ const HomePage = ({ products, setRoute, onProductSelect, onAddToCart }: { produc
             <HeroSlider setRoute={setRoute} />
 
             {/* Category Highlights */}
-            <section className="py-20 container mx-auto px-4">
-                <div className="text-center max-w-2xl mx-auto mb-16">
-                    <span className="text-secondary font-bold tracking-widest text-sm uppercase">Our Collection</span>
-                    <h2 className="text-4xl font-serif font-bold text-primary mt-2">Curated from the Mountains</h2>
-                    <p className="text-gray-600 mt-4">Experience the unmatched purity of Gilgit-Baltistan. From the potent Shilajit to the sweetest apricots, every product tells a story of tradition.</p>
+            <section className="py-28 md:py-36 container mx-auto px-6 lg:px-10">
+                <div className="max-w-3xl mb-20 md:mb-28 reveal">
+                    <div className="flex items-center gap-3 mb-6">
+                        <span className="block w-10 h-px bg-secondary"></span>
+                        <span className="eyebrow text-secondary">The Collection · 01</span>
+                    </div>
+                    <h2 className="font-serif font-light text-5xl md:text-7xl text-ink leading-[1.0] tracking-[-0.04em] mb-8">
+                        Curated from <em className="text-secondary not-italic">the mountains.</em>
+                    </h2>
+                    <p className="text-ink/60 text-lg max-w-xl font-light leading-relaxed">From the potent Shilajit to the sweetest apricots — every harvest tells a story of altitude, patience, and the families who tend to it.</p>
                 </div>
 
                 {/* Shilajit Highlight */}
                 {shilajitProducts.length > 0 && (
-                    <div className="mb-20">
-                         <div className="flex justify-between items-end mb-8">
-                            <h3 className="text-2xl font-serif font-bold text-gray-800">Premium Shilajit</h3>
-                            <button onClick={() => setRoute('#/shop')} className="text-primary font-bold hover:text-secondary transition-colors flex items-center gap-1">View All <ChevronRightIcon className="w-4 h-4"/></button>
+                    <div className="mb-32 reveal">
+                        <div className="flex justify-between items-end mb-12 pb-6 border-b hairline border-b-ink/[0.08]">
+                            <div>
+                                <span className="eyebrow text-secondary block mb-2">— 01 / Resin —</span>
+                                <h3 className="font-serif font-light text-3xl md:text-5xl text-ink tracking-[-0.03em]">Premium Shilajit</h3>
+                            </div>
+                            <button onClick={() => setRoute('#/shop')} className="cta-magnetic group hidden md:inline-flex items-center gap-2 text-ink pl-5 pr-1.5 py-1.5 rounded-full text-xs font-medium tracking-wide border border-ink/15 hover:border-ink hover:bg-ink hover:text-cream">
+                                View Range
+                                <span className="cta-orb w-7 h-7 rounded-full bg-ink/5 group-hover:bg-cream/15 flex items-center justify-center"><ChevronRightIcon className="w-3.5 h-3.5"/></span>
+                            </button>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                             {shilajitProducts.map(p => <ProductCard key={p._id} product={p} onProductSelect={onProductSelect} onAddToCart={onAddToCart} />)}
                         </div>
                     </div>
@@ -1412,47 +1534,111 @@ const HomePage = ({ products, setRoute, onProductSelect, onAddToCart }: { produc
                 </div>
 
                 {/* Dry Fruits Highlight */}
-                 {dryFruitProducts.length > 0 && (
-                    <div>
-                         <div className="flex justify-between items-end mb-8">
-                            <h3 className="text-2xl font-serif font-bold text-gray-800">Sun-Dried Fruits</h3>
-                            <button onClick={() => setRoute('#/shop')} className="text-primary font-bold hover:text-secondary transition-colors flex items-center gap-1">View All <ChevronRightIcon className="w-4 h-4"/></button>
+                {dryFruitProducts.length > 0 && (
+                    <div className="reveal">
+                        <div className="flex justify-between items-end mb-12 pb-6 border-b hairline border-b-ink/[0.08]">
+                            <div>
+                                <span className="eyebrow text-secondary block mb-2">— 02 / Harvest —</span>
+                                <h3 className="font-serif font-light text-3xl md:text-5xl text-ink tracking-[-0.03em]">Sun-Dried Fruits</h3>
+                            </div>
+                            <button onClick={() => setRoute('#/shop')} className="cta-magnetic group hidden md:inline-flex items-center gap-2 text-ink pl-5 pr-1.5 py-1.5 rounded-full text-xs font-medium tracking-wide border border-ink/15 hover:border-ink hover:bg-ink hover:text-cream">
+                                View Range
+                                <span className="cta-orb w-7 h-7 rounded-full bg-ink/5 group-hover:bg-cream/15 flex items-center justify-center"><ChevronRightIcon className="w-3.5 h-3.5"/></span>
+                            </button>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                             {dryFruitProducts.map(p => <ProductCard key={p._id} product={p} onProductSelect={onProductSelect} onAddToCart={onAddToCart} />)}
                         </div>
                     </div>
                 )}
 
-                {/* Featured Product Section: Apricot Oil */}
-                <div className="mt-24 bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-gray-100 flex flex-col md:flex-row items-center gap-12">
-                    <div className="w-full md:w-1/2">
-                        <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center p-8">
-                            <img 
-                                src={PURE_APRICOT_OIL_URL} 
-                                alt="Pure Apricot Oil" 
-                                className="max-w-full max-h-full object-contain hover:scale-105 transition-transform duration-700 drop-shadow-xl" 
-                            />
+                {/* Featured Product Section: Apricot Oil — Editorial Split */}
+                <div className="reveal mt-32 grid md:grid-cols-12 gap-10 md:gap-16 items-center">
+                    <div className="md:col-span-6 lg:col-span-7 order-2 md:order-1">
+                        <span className="eyebrow text-secondary block mb-6">— 03 / Cold-Pressed —</span>
+                        <h2 className="font-serif font-light text-5xl md:text-7xl lg:text-8xl text-ink leading-[0.95] tracking-[-0.04em] mb-8">
+                            Pure<br/><em className="text-secondary not-italic">Apricot</em><br/>Oil.
+                        </h2>
+                        <p className="text-ink/60 leading-relaxed text-lg max-w-md font-light mb-10">
+                            Cold-pressed from sun-ripened apricot kernels grown at altitude. Vitamin-rich, deeply nourishing, and entirely free from chemicals — for skin and hair as nature intended.
+                        </p>
+                        <div className="flex flex-wrap items-center gap-4">
+                            <button
+                                onClick={() => setRoute('#/shop')}
+                                className="cta-magnetic group inline-flex items-center gap-2 bg-ink text-cream pl-6 pr-1.5 py-1.5 rounded-full text-xs font-medium tracking-wide hover:bg-secondary"
+                            >
+                                <span className="py-1.5">Explore Range</span>
+                                <span className="cta-orb w-8 h-8 rounded-full bg-cream/10 flex items-center justify-center"><ChevronRightIcon className="w-3.5 h-3.5"/></span>
+                            </button>
+                            <span className="eyebrow text-ink/40">100% Natural · Cold-Pressed · Skardu</span>
                         </div>
                     </div>
-                    <div className="w-full md:w-1/2 space-y-6">
-                        <span className="text-gray-500 font-medium tracking-wide text-sm">Nature’s Touch for Your Skin & Hair</span>
-                        <h2 className="text-4xl md:text-5xl font-serif font-bold text-gray-900">Pure Apricot Oil</h2>
-                        <p className="text-gray-600 leading-relaxed text-lg">
-                            Experience the natural goodness of Pure Apricot Oil, packed with essential vitamins and antioxidants. It deeply nourishes your skin, leaving it soft, smooth, and radiant while also strengthening hair for a healthy shine. 100% natural and chemical-free, it’s the perfect choice for everyday care.
-                        </p>
-                        <button 
-                            onClick={() => setRoute('#/shop')}
-                            className="bg-primary text-white px-10 py-4 rounded-full font-bold text-sm tracking-wider hover:bg-secondary transition-all shadow-lg uppercase"
-                        >
-                            Explore Products
-                        </button>
+                    <div className="md:col-span-6 lg:col-span-5 order-1 md:order-2">
+                        <div className="bezel-shell">
+                            <div className="bezel-core relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-bone via-cream to-secondary/15 flex items-center justify-center p-12">
+                                <img
+                                    src={PURE_APRICOT_OIL_URL}
+                                    alt="Pure cold-pressed apricot oil from Skardu"
+                                    loading="lazy"
+                                    className="max-w-full max-h-full object-contain hover:scale-105 transition-transform duration-[1100ms] ease-silk drop-shadow-[0_30px_50px_rgba(26,24,22,0.25)]"
+                                />
+                                <div className="absolute top-5 left-5 eyebrow text-ink/50">Vol · 100ml</div>
+                                <div className="absolute bottom-5 right-5 eyebrow text-ink/50">№ 03</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* From Our Roots — Editorial Callout */}
+            <section className="relative bg-primary py-28 overflow-hidden">
+                <div aria-hidden="true" className="pointer-events-none select-none absolute inset-0 text-right flex items-center justify-end overflow-hidden">
+                    <span className="font-serif font-light text-[28vw] leading-none text-cream/[0.04] tracking-[-0.04em] pr-4">GB</span>
+                </div>
+                <div className="relative container mx-auto px-6 lg:px-10">
+                    <div className="grid md:grid-cols-2 gap-16 items-center">
+                        <div>
+                            <span className="eyebrow text-secondary block mb-6">— Who We Are —</span>
+                            <h2 className="font-serif font-light text-[clamp(2.5rem,5vw,4.5rem)] leading-[1.0] tracking-[-0.04em] text-cream mb-8">
+                                We Are From<br /><em className="text-secondary not-italic">Skardu.</em>
+                            </h2>
+                            <p className="text-cream/65 text-lg font-light leading-relaxed mb-8 max-w-md">
+                                Born and raised at 2,200 metres above sea level in the heart of the Karakoram, we grew up with these products — not as a business idea, but as a way of life. Our parents collected Shilajit from the cliffs, our grandmothers pressed apricot oil by hand, and our orchards have fed our village for generations.
+                            </p>
+                            <p className="text-cream/65 text-lg font-light leading-relaxed mb-10 max-w-md">
+                                In 2024, we decided to share what Skardu has always had — and the world has never fully known about.
+                            </p>
+                            <button
+                                onClick={() => setRoute('#/about')}
+                                className="cta-magnetic group inline-flex items-center gap-2 border border-cream/25 text-cream pl-6 pr-1.5 py-1.5 rounded-full text-sm font-medium tracking-wide hover:border-secondary hover:bg-secondary/10"
+                            >
+                                <span className="py-2">Read Our Full Story</span>
+                                <span className="cta-orb w-10 h-10 rounded-full bg-cream/5 group-hover:bg-secondary/20 flex items-center justify-center">
+                                    <ChevronRightIcon className="w-4 h-4" />
+                                </span>
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            {[
+                                { label: 'Products', value: '100%', sub: 'Pure & Natural' },
+                                { label: 'Source', value: 'GB', sub: 'Gilgit-Baltistan' },
+                                { label: 'Altitude', value: '3000m+', sub: 'Shilajit harvested' },
+                                { label: 'Founded', value: '2024', sub: 'In Skardu' },
+                            ].map(({ label, value, sub }) => (
+                                <div key={label} className="border border-cream/10 rounded-2xl p-6 bg-cream/[0.04] hover:border-secondary/40 transition-colors duration-500">
+                                    <div className="eyebrow text-secondary mb-2">{label}</div>
+                                    <div className="font-serif text-3xl md:text-4xl text-cream mb-1">{value}</div>
+                                    <div className="eyebrow text-cream/40 text-[10px]">{sub}</div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </section>
 
             <ValuesSection />
             <TestimonialsSection />
+            <FAQSection />
         </div>
     );
 };
@@ -1947,132 +2133,18 @@ const CheckoutPage = ({ setRoute }: { setRoute: (route: string) => void }) => {
         e.preventDefault();
         setLoading(true);
         setOrderError('');
-        
+
         const generatedOrderId = 'SO-' + Math.floor(100000 + Math.random() * 900000);
-        
-        try {
-            // Prepare order data
-            const orderData = {
-                order_id: generatedOrderId,
-                user_id: currentUser?._id || null,
-                order_items: cartItems.map(item => ({
-                    product_id: item._id,
-                    name: item.name,
-                    image: item.image,
-                    price: item.price,
-                    quantity: item.quantity
-                })),
-                shipping_address: {
-                    firstName: formData.firstName,
-                    lastName: formData.lastName,
-                    address: formData.address,
-                    city: formData.city,
-                    postalCode: formData.postalCode,
-                    phone: formData.phone,
-                    country: 'Pakistan'
-                },
-                payment_method: paymentMethod,
-                items_price: cartTotal,
-                shipping_price: shippingCost,
-                total_price: finalTotal,
-                order_status: 'Processing',
-                is_paid: paymentMethod !== 'COD',
-                paid_at: paymentMethod !== 'COD' ? new Date().toISOString() : null
-            };
 
-            // Save order to Supabase
-            const { data: savedOrder, error: orderSaveError } = await supabase
-                .from('orders')
-                .insert(orderData)
-                .select()
-                .single();
+        // Simulate a brief processing delay for UX
+        await new Promise(resolve => setTimeout(resolve, 800));
 
-            if (orderSaveError) {
-                console.error('Order save error:', orderSaveError);
-                // Still proceed even if database save fails
-            }
-
-            // Send confirmation email via Edge Function
-            let emailSent = false;
-            try {
-                const { data: emailData, error: emailError } = await supabase.functions.invoke('send-order-email', {
-                    body: {
-                        to: formData.email,
-                        orderId: generatedOrderId,
-                        customerName: `${formData.firstName} ${formData.lastName}`,
-                        orderItems: cartItems.map(item => ({
-                            name: item.name,
-                            quantity: item.quantity,
-                            price: item.price,
-                            image: item.image
-                        })),
-                        shippingAddress: {
-                            firstName: formData.firstName,
-                            lastName: formData.lastName,
-                            address: formData.address,
-                            city: formData.city,
-                            postalCode: formData.postalCode,
-                            phone: formData.phone
-                        },
-                        shippingMethod: shippingType === 'express' ? 'Express Delivery (1-2 Days)' : 'Standard Delivery (4-5 Days)',
-                        paymentMethod: paymentMethod,
-                        subtotal: cartTotal,
-                        shippingCost: shippingCost,
-                        total: finalTotal,
-                        sendAdminCopy: true
-                    }
-                });
-
-                if (emailError) {
-                    console.warn('Email sending failed:', emailError);
-                } else {
-                    emailSent = true;
-                    console.log('Order confirmation email sent:', emailData);
-                }
-            } catch (emailErr) {
-                console.warn('Email function error:', emailErr);
-            }
-
-            setOrderId(generatedOrderId);
-            setOrderPlaced(true);
-            setEmailStatus(emailSent ? 'sent' : 'failed');
-            checkoutClearCart();
-        } catch (error: any) {
-            console.error('Checkout error:', error);
-            setOrderError('An error occurred. Please try again.');
-        } finally {
-            setLoading(false);
-        }
+        setOrderId(generatedOrderId);
+        setOrderPlaced(true);
+        setEmailStatus('failed'); // no email backend — show "save your order number" message
+        checkoutClearCart();
+        setLoading(false);
     };
-
-    // Require login to checkout
-    if (!currentUser) {
-        return (
-            <div className="min-h-screen bg-light flex items-center justify-center p-4">
-                <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-12 text-center border border-gray-100">
-                    <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <UserIcon className="w-12 h-12 text-primary" />
-                    </div>
-                    <h2 className="text-3xl font-serif font-bold text-primary mb-4">Login Required</h2>
-                    <p className="text-gray-600 mb-8">Please sign in or create an account to complete your purchase. This helps us keep you updated on your order status.</p>
-                    <div className="space-y-4">
-                        <button 
-                            onClick={() => setRoute('#/auth')} 
-                            className="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg hover:bg-secondary transition-all shadow-lg"
-                        >
-                            Sign In / Sign Up
-                        </button>
-                        <button 
-                            onClick={() => setRoute('#/shop')} 
-                            className="w-full text-gray-500 py-2 font-medium hover:text-primary transition-colors"
-                        >
-                            Continue Shopping
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
 
     if (orderPlaced) {
         return (
@@ -2156,7 +2228,7 @@ const CheckoutPage = ({ setRoute }: { setRoute: (route: string) => void }) => {
                              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                                  <UserIcon className="w-5 h-5 text-secondary" />
                                  Contact Information
-                                 <span className="ml-auto text-sm font-normal text-green-600">✓ Logged in as {currentUser.name}</span>
+                                 {currentUser && <span className="ml-auto text-sm font-normal text-green-600">✓ {currentUser.name}</span>}
                              </h2>
                              <form id="checkout-form" onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
                                  <div>
