@@ -2144,6 +2144,27 @@ const CheckoutPage = ({ setRoute }: { setRoute: (route: string) => void }) => {
         setEmailStatus('failed'); // no email backend — show "save your order number" message
         checkoutClearCart();
         setLoading(false);
+
+        // Build WhatsApp message with order details
+        const itemsList = cartItems.map(item => `• ${item.name} x${item.quantity} — Rs ${(item.price * item.quantity).toLocaleString()}`).join('\n');
+        const whatsappMessage = 
+`🛒 *New Order — #${generatedOrderId}*
+
+*Customer Details:*
+Name: ${formData.firstName} ${formData.lastName}
+Email: ${formData.email}
+Phone: ${formData.phone}
+Address: ${formData.address}, ${formData.city} ${formData.postalCode}
+
+*Order Items:*
+${itemsList}
+
+Shipping: ${shippingType === 'express' ? 'Express (1-2 Days) — Rs 500' : (cartTotal > 2000 ? 'Standard (4-5 Days) — Free' : 'Standard (4-5 Days) — Rs 200')}
+Payment: ${paymentMethod}
+*Total: Rs ${finalTotal.toLocaleString()}*`;
+
+        const whatsappUrl = `https://wa.me/923495614416?text=${encodeURIComponent(whatsappMessage)}`;
+        window.open(whatsappUrl, '_blank');
     };
 
     if (orderPlaced) {
@@ -2181,7 +2202,7 @@ const CheckoutPage = ({ setRoute }: { setRoute: (route: string) => void }) => {
                     <div className="bg-gray-50 rounded-xl p-4 mb-6">
                         <p className="text-sm text-gray-600 mb-2">Need help with your order?</p>
                         <a 
-                            href={`https://wa.me/923488875456?text=Hi! I just placed order ${orderId} and have a question.`}
+                            href={`https://wa.me/923495614416?text=Hi! I just placed order ${orderId} and have a question.`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 text-green-600 font-medium hover:text-green-700"
@@ -2389,11 +2410,26 @@ const ContactPage = ({ setRoute }: { setRoute: (route: string) => void }) => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setStatus('submitting');
-        // Simulate API call
+
+        // Build WhatsApp message from contact form
+        const whatsappMessage = 
+`📩 *New Contact Message*
+
+*From:* ${formData.name}
+*Email:* ${formData.email}
+*Subject:* ${formData.subject}
+
+*Message:*
+${formData.message}`;
+
+        const whatsappUrl = `https://wa.me/923495614416?text=${encodeURIComponent(whatsappMessage)}`;
+
+        // Brief delay for UX then redirect
         setTimeout(() => {
             setStatus('success');
             setFormData({ name: '', email: '', subject: '', message: '' });
-        }, 1500);
+            window.open(whatsappUrl, '_blank');
+        }, 800);
     };
 
     return (
