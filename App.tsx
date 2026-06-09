@@ -627,7 +627,7 @@ const Footer = ({ setRoute }: { setRoute: (route: string) => void }) => {
                         <ul className="space-y-5 text-sm text-cream/65 font-light">
                             <li className="flex items-start space-x-3">
                                 <div className="mt-1 text-secondary"><SendIcon className="w-4 h-4" /></div>
-                                <a href="mailto:support@skarduorganic.com" className="hover:text-cream transition-colors">support@skarduorganic.com</a>
+                                <a href="mailto:contactwaqarnow@gmail.com" className="hover:text-cream transition-colors">contactwaqarnow@gmail.com</a>
                             </li>
                             <li className="flex items-start space-x-3">
                                 <div className="mt-1 text-secondary">
@@ -963,7 +963,7 @@ const HeroSlider = ({ setRoute }: { setRoute: (route: string) => void; }) => {
 
             {/* Content — Editorial Split */}
             <div className="relative h-full min-h-dvh container mx-auto px-6 md:px-10 flex items-center">
-                <div className="w-full md:w-[60%] text-cream pt-32 pb-16 md:py-0">
+                <div className="w-full md:w-[60%] text-cream pt-36 pb-16 md:pt-28 lg:pt-0">
                     {HERO_SLIDES.map((slide, index) => (
                         <div key={index} className={`transition-all duration-[1100ms] ease-silk ${index === currentIndex ? 'opacity-100 translate-y-0 blur-0' : 'opacity-0 translate-y-8 blur-md pointer-events-none absolute'}`}>
                             <div className="flex items-center gap-3 mb-8">
@@ -1142,11 +1142,11 @@ const FAQSection = () => {
         },
         {
             q: "What is your return and refund policy?",
-            a: "We stand 100% behind the quality of everything we sell. If your order arrives damaged, or if you are not completely satisfied, contact us within 7 days of delivery at support@skarduorganic.com or via WhatsApp at +92 348 887 5456. We will arrange a replacement or full refund, no questions asked."
+            a: "We stand 100% behind the quality of everything we sell. If your order arrives damaged, or if you are not completely satisfied, contact us within 7 days of delivery at contactwaqarnow@gmail.com or via WhatsApp at +92 349 561 4416. We will arrange a replacement or full refund, no questions asked."
         },
         {
             q: "Can I order in bulk or for wholesale?",
-            a: "Absolutely — and we encourage it. We welcome bulk and wholesale orders from health stores, retailers, and businesses. Please reach out at support@skarduorganic.com with your requirements and volume, and we will prepare a competitive wholesale pricing package tailored to your needs."
+            a: "Absolutely — and we encourage it. We welcome bulk and wholesale orders from health stores, retailers, and businesses. Please reach out at contactwaqarnow@gmail.com with your requirements and volume, and we will prepare a competitive wholesale pricing package tailored to your needs."
         },
         {
             q: "How should I store Shilajit properly?",
@@ -1274,8 +1274,8 @@ const AboutPage = ({ setRoute }: { setRoute: (route: string) => void }) => {
                     <div className="w-full lg:w-1/2 relative group">
                         <div className="absolute inset-0 bg-primary/10 transform -translate-x-4 translate-y-4 rounded-3xl transition-transform duration-500 group-hover:-translate-x-2 group-hover:translate-y-2"></div>
                         <img
-                            src="https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=1000"
-                            alt="Dry Fruits from Skardu"
+                            src="/img/Organic-Shelajit.jpeg"
+                            alt="Pure Organic Shilajit from Skardu"
                             className="relative rounded-3xl shadow-2xl w-full object-cover aspect-[4/3] transition-transform duration-700 group-hover:scale-[1.02]"
                         />
                     </div>
@@ -1369,8 +1369,8 @@ const AboutPage = ({ setRoute }: { setRoute: (route: string) => void }) => {
                     <div className="w-full lg:w-1/2 relative group">
                         <div className="absolute inset-0 bg-secondary/10 transform translate-x-4 translate-y-4 rounded-3xl transition-transform duration-500 group-hover:translate-x-2 group-hover:translate-y-2"></div>
                         <img
-                            src="https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&q=80&w=1000"
-                            alt="Organic produce from Gilgit-Baltistan"
+                            src="/img/Image-GYM.jpg"
+                            alt="Strength and wellness with Skardu Organics"
                             className="relative rounded-3xl shadow-2xl w-full object-cover aspect-[4/3] transition-transform duration-700 group-hover:scale-[1.02]"
                         />
                     </div>
@@ -1686,6 +1686,42 @@ const ShopPage = ({ products, onProductSelect, onAddToCart }: { products: Produc
                         <p className="text-gray-500 mt-2">Try adjusting your filters or search query.</p>
                     </div>
                 )}
+
+                {/* ── Bulk Purchase Banner ── */}
+                <div className="mt-16 rounded-3xl overflow-hidden bg-primary relative">
+                    <div aria-hidden="true" className="pointer-events-none select-none absolute -bottom-4 right-0 text-right">
+                        <span className="font-serif font-light text-[16vw] leading-none text-cream/[0.05] tracking-[-0.04em]">Bulk</span>
+                    </div>
+                    <div className="relative flex flex-col md:flex-row items-center justify-between gap-8 p-8 md:p-12">
+                        <div className="text-center md:text-left">
+                            <span className="eyebrow text-secondary block mb-3">For Businesses &amp; Retailers</span>
+                            <h2 className="font-serif font-light text-3xl md:text-4xl text-cream leading-tight tracking-[-0.03em] mb-3">
+                                Bulk &amp; Wholesale <em className="text-secondary not-italic">Orders</em>
+                            </h2>
+                            <p className="text-cream/65 font-light leading-relaxed max-w-lg">
+                                Health stores, gyms, retailers and corporate buyers — get competitive wholesale pricing and custom packaging directly from the source. Minimum order quantities apply.
+                            </p>
+                        </div>
+                        <div className="flex-shrink-0 flex flex-col sm:flex-row md:flex-col gap-4 w-full md:w-auto">
+                            <a
+                                href="mailto:contactwaqarnow@gmail.com?subject=Bulk%20Purchase%20Inquiry&body=Hi%2C%20I%20am%20interested%20in%20bulk%20ordering%20from%20Skardu%20Organics.%20Please%20share%20your%20wholesale%20pricing."
+                                className="inline-flex items-center justify-center gap-2 bg-secondary text-cream px-8 py-4 rounded-full font-bold text-sm tracking-wide hover:bg-cream hover:text-ink transition-all duration-500 ease-spring shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                Email for Bulk Pricing
+                            </a>
+                            <a
+                                href="https://wa.me/923495614416?text=Hi!%20I%20am%20interested%20in%20placing%20a%20bulk%20order%20from%20Skardu%20Organics.%20Please%20share%20details."
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center gap-2 bg-cream/10 border border-cream/25 text-cream px-8 py-4 rounded-full font-medium text-sm tracking-wide hover:bg-cream/20 transition-all duration-500"
+                            >
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                                WhatsApp Us
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );
@@ -2450,7 +2486,7 @@ ${formData.message}`;
                             </div>
                             <h3 className="text-xl font-serif font-bold text-gray-900 mb-2">Email Us</h3>
                             <p className="text-gray-500 mb-4 text-sm">For general inquiries and support.</p>
-                            <a href="mailto:support@skarduorganic.com" className="text-primary font-bold hover:text-secondary transition-colors">support@skarduorganic.com</a>
+                            <a href="mailto:contactwaqarnow@gmail.com" className="text-primary font-bold hover:text-secondary transition-colors">contactwaqarnow@gmail.com</a>
                         </div>
 
                         <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all">

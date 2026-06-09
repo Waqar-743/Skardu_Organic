@@ -18,7 +18,7 @@ export const MOCK_PRODUCTS: Product[] = [
     brand: 'Skardu Organics',
     category: 'Shilajit',
     description: '100% pure, lab-tested Shilajit resin harvested from the highest altitudes of the Himalayas. A potent source of fulvic acid and over 84 essential minerals.',
-    price: 4500,
+    price: 2999,
     countInStock: 15,
     rating: 4.8,
     numReviews: 3,
@@ -26,6 +26,22 @@ export const MOCK_PRODUCTS: Product[] = [
       { _id: 'r1', name: 'Ali Khan', rating: 5, comment: 'Amazing quality! Felt the difference in energy within days.', createdAt: '2023-10-15T10:00:00Z' },
       { _id: 'r2', name: 'Sara Ahmed', rating: 5, comment: 'Packaging was great and the resin is very pure.', createdAt: '2023-10-18T14:30:00Z' },
       { _id: 'r3', name: 'John Doe', rating: 4, comment: 'Good product, but delivery took a bit longer than expected.', createdAt: '2023-11-02T09:15:00Z' },
+    ]
+  },
+  {
+    _id: '1b',
+    name: 'Himalayan Shilajit Resin (10g)',
+    image: SHILAJIT_10G_URL,
+    brand: 'Skardu Organics',
+    category: 'Shilajit',
+    description: '100% pure, lab-tested Shilajit resin harvested from the highest altitudes of the Himalayas. Perfect starter size — a potent source of fulvic acid and over 84 essential minerals.',
+    price: 1900,
+    countInStock: 20,
+    rating: 4.8,
+    numReviews: 2,
+    reviews: [
+      { _id: 'r1b1', name: 'Usman Ali', rating: 5, comment: 'Great starter pack! Perfect quality.', createdAt: '2024-01-10T10:00:00Z' },
+      { _id: 'r1b2', name: 'Maria Khan', rating: 5, comment: 'Excellent quality for the price.', createdAt: '2024-02-05T14:30:00Z' },
     ]
   },
   {
@@ -138,7 +154,7 @@ export const MOCK_PRODUCTS: Product[] = [
   {
     _id: '10',
     name: 'Shilajit with Ashwagandha',
-    image: SHILAJIT_10G_URL,
+    image: PURE_SHILAJIT_20G_URL,
     brand: 'Skardu Organics',
     category: 'Shilajit',
     description: 'A powerful blend of Himalayan Shilajit and Ashwagandha root extract to combat stress and boost energy levels.',
