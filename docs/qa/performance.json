@@ -1,0 +1,18 @@
+{
+  "environment": "Local Vite production preview, Chromium, mobile viewport 390x844, CPU 4x slowdown, 1.6 Mbps download, 150 ms latency",
+  "note": "Single synthetic run. Event timing is observed interaction latency, not field INP. Values vary by host; no field Core Web Vitals claim.",
+  "lcp": 2328,
+  "cls": 0,
+  "eventDurations": [
+    120,
+    120,
+    120,
+    40,
+    40,
+    40,
+    80,
+    80,
+    80
+  ],
+  "transferBytes": 616697
+}

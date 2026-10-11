@@ -1,0 +1,24 @@
+import { chromium } from '@playwright/test';
+import { writeFile } from 'node:fs/promises';
+const browser=await chromium.launch();
+const page=await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:1});
+await page.addInitScript(()=>{
+ window.__metrics={lcp:0,cls:0,eventDurations:[]};
+ new PerformanceObserver(list=>{for(const e of list.getEntries())window.__metrics.lcp=e.startTime;}).observe({type:'largest-contentful-paint',buffered:true});
+ new PerformanceObserver(list=>{for(const e of list.getEntries())if(!e.hadRecentInput)window.__metrics.cls+=e.value;}).observe({type:'layout-shift',buffered:true});
+ new PerformanceObserver(list=>{for(const e of list.getEntries())if(e.interactionId)window.__metrics.eventDurations.push(e.duration);}).observe({type:'event',durationThreshold:16,buffered:true});
+});
+const client=await page.context().newCDPSession(page);
+await client.send('Network.enable');
+await client.send('Network.emulateNetworkConditions',{offline:false,latency:150,downloadThroughput:1.6*1024*1024/8,uploadThroughput:750*1024/8});
+await client.send('Emulation.setCPUThrottlingRate',{rate:4});
+await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
+await page.waitForTimeout(1500);
+await page.getByRole('button',{name:'Open menu'}).click();
+await page.getByRole('navigation',{name:'Mobile navigation'}).getByRole('link',{name:'The collection'}).click();
+await page.waitForTimeout(1200);
+await page.getByRole('button',{name:'Add Apricot kernel oil 120 ml to bag'}).click();
+await page.waitForTimeout(300);
+const metrics=await page.evaluate(()=>({...window.__metrics,transferBytes:performance.getEntriesByType('resource').reduce((sum,e)=>sum+e.transferSize,0)}));
+await writeFile('docs/qa/performance.json',JSON.stringify({environment:'Local Vite production preview, Chromium, mobile viewport 390x844, CPU 4x slowdown, 1.6 Mbps download, 150 ms latency',note:'Single synthetic run. Event timing is observed interaction latency, not field INP. Values vary by host; no field Core Web Vitals claim.',...metrics},null,2));
+console.log(metrics);await browser.close();

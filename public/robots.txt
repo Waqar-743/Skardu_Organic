@@ -1,6 +1,2 @@
 User-agent: *
-Allow: /
-Disallow: /admin
-Disallow: /checkout
-
-Sitemap: https://skarduorganic.com/sitemap.xml
+Disallow: /

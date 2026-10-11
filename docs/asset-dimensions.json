@@ -1,0 +1,86 @@
+[
+  {
+    "name": "mountains",
+    "source": "C:/Users/dell/.codex/generated_images/01a12896-0261-70d1-90d1-a724f82d9094/exec-56548e1e-56b9-4d51-9aac-feaec8793780.png",
+    "alpha": false,
+    "format": "webp",
+    "width": 1672,
+    "height": 941,
+    "channels": 3,
+    "premultiplied": false,
+    "hasAlpha": false,
+    "size": 268932
+  },
+  {
+    "name": "orchard",
+    "source": "C:/Users/dell/.codex/generated_images/01a12896-0261-70d1-90d1-a724f82d9094/exec-e0d03d6d-04c0-4d43-b78c-ef045aba60f2.png",
+    "alpha": false,
+    "format": "webp",
+    "width": 1000,
+    "height": 1250,
+    "channels": 3,
+    "premultiplied": false,
+    "hasAlpha": false,
+    "size": 229162
+  },
+  {
+    "name": "apricot-oil",
+    "source": "C:/Users/dell/.codex/generated_images/01a12896-0261-70d1-90d1-a724f82d9094/exec-ad8523e7-1a13-4bd7-a10b-62972b5f12dd.png",
+    "alpha": true,
+    "format": "webp",
+    "width": 700,
+    "height": 1050,
+    "channels": 4,
+    "premultiplied": true,
+    "hasAlpha": true,
+    "size": 82608
+  },
+  {
+    "name": "apricots",
+    "source": "public/img/Dried-Apricot-500g.png",
+    "alpha": true,
+    "format": "webp",
+    "width": 700,
+    "height": 580,
+    "channels": 4,
+    "premultiplied": true,
+    "hasAlpha": true,
+    "size": 31066
+  },
+  {
+    "name": "almonds",
+    "source": "public/img/Almonds-500g.png",
+    "alpha": true,
+    "format": "webp",
+    "width": 700,
+    "height": 580,
+    "channels": 4,
+    "premultiplied": true,
+    "hasAlpha": true,
+    "size": 38072
+  },
+  {
+    "name": "shilajit",
+    "source": "public/img/Organic-Shilajit-20g.png",
+    "alpha": true,
+    "format": "webp",
+    "width": 700,
+    "height": 580,
+    "channels": 4,
+    "premultiplied": true,
+    "hasAlpha": true,
+    "size": 35126
+  },
+  {
+    "name": "shilajit-small",
+    "source": "public/img/Shilajit-10g.png",
+    "alpha": true,
+    "format": "webp",
+    "width": 700,
+    "height": 580,
+    "channels": 4,
+    "premultiplied": true,
+    "hasAlpha": true,
+    "size": 47726
+  }
+]

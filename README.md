@@ -1,260 +1,70 @@
-# 🌿 Skardu Organics
+# Skardu Organic
 
-<div align="center">
+A React + TypeScript storefront inspired by Baltistan, retaining the owner's official green-and-gold logo. Built on the existing Vite project.
 
-![Skardu Organics](public/img/Hero-section.png)
+## Run locally
 
-**Premium Organic Products from the Heart of the Himalayas**
+Requires Node.js 22.12+ (or Node 24).
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge)](https://skarduorganic.com)
-[![React](https://img.shields.io/badge/React-18.x-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-5.x-646CFF?style=for-the-badge&logo=vite)](https://vitejs.dev/)
-[![Supabase](https://img.shields.io/badge/Supabase-Backend-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com/)
-[![TailwindCSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
-
-</div>
-
----
-
-## 📋 Table of Contents
-
-- [About](#-about)
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Getting Started](#-getting-started)
-- [Environment Variables](#-environment-variables)
-- [Project Structure](#-project-structure)
-- [Database Schema](#-database-schema)
-- [Deployment](#-deployment)
-- [Contributing](#-contributing)
-- [License](#-license)
-
----
-
-## 🏔️ About
-
-**Skardu Organics** is a premium e-commerce platform specializing in authentic organic products sourced directly from the Skardu Valley in the Himalayas. Our product range includes:
-
-- 🍯 **Pure Himalayan Shilajit** - Natural resin for vitality and wellness
-- 🫒 **Cold-Pressed Organic Oils** - Apricot, Walnut, and Sea Buckthorn oils
-- 🥜 **Sun-Dried Dry Fruits** - Almonds, Apricots, Walnuts, and more
-- 🌿 **Natural Health Products** - Wild Forest Honey and herbal blends
-
----
-
-## ✨ Features
-
-### Customer Features
-- 🛒 **Shopping Cart** - Add, remove, and manage products
-- 🔐 **User Authentication** - Secure signup/login via Supabase Auth
-- 📦 **Order Management** - Place orders with multiple payment options
-- 📧 **Email Notifications** - Order confirmation emails via Resend
-- 🔍 **Product Search** - Search and filter products by category
-- 📱 **Responsive Design** - Optimized for all devices
-- ⭐ **Product Reviews** - Rate and review products
-
-### Technical Features
-- ⚡ **Fast Performance** - Built with Vite for lightning-fast load times
-- 🎨 **Modern UI** - Beautiful, accessible interface with TailwindCSS
-- 🔒 **Secure Backend** - Supabase with Row Level Security (RLS)
-- 📊 **Real-time Updates** - Live data synchronization
-- 🌐 **SEO Optimized** - Meta tags and semantic HTML
-
----
-
-## 🛠️ Tech Stack
-
-| Category | Technology |
-|----------|------------|
-| **Frontend** | React 18, TypeScript |
-| **Styling** | TailwindCSS, Custom Theme |
-| **Build Tool** | Vite 5 |
-| **Backend** | Supabase (PostgreSQL) |
-| **Authentication** | Supabase Auth |
-| **Email Service** | Resend (via Edge Functions) |
-| **Deployment** | Vercel / Netlify / GitHub Pages |
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18+ 
-- npm or yarn
-- Supabase account
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/skardu-organic.git
-   cd skardu-organic
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env.local
-   ```
-   Edit `.env.local` with your Supabase credentials.
-
-4. **Run the development server**
-   ```bash
-   npm run dev
-   ```
-
-5. **Open in browser**
-   ```
-   http://localhost:3000
-   ```
-
----
-
-## 🔐 Environment Variables
-
-Create a `.env.local` file in the root directory:
-
-```env
-# Supabase Configuration
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```powershell
+npm ci
+npm run dev
 ```
 
-### For Supabase Edge Functions
+Open http://127.0.0.1:3000/. Production checks:
 
-Set these secrets in your Supabase project:
-
-```bash
-supabase secrets set RESEND_API_KEY=your_resend_api_key
-supabase secrets set ADMIN_EMAIL=admin@yourdomain.com
-supabase secrets set SITE_URL=https://yourdomain.com
-```
-
----
-
-## 📁 Project Structure
-
-```
-skardu-organic/
-├── .github/
-│   └── workflows/
-│       └── deploy.yml          # CI/CD pipeline
-├── components/
-│   └── Icons.tsx               # SVG icon components
-├── lib/
-│   └── supabase.ts             # Supabase client
-├── public/
-│   └── img/                    # Static images
-├── supabase/
-│   └── functions/
-│       └── send-order-email/   # Edge function for emails
-├── App.tsx                     # Main application
-├── assets.ts                   # Image path exports
-├── constants.ts                # App constants
-├── index.html                  # HTML entry point
-├── index.tsx                   # React entry point
-├── mockData.ts                 # Sample product data
-├── types.ts                    # TypeScript interfaces
-├── vite.config.ts              # Vite configuration
-└── package.json
-```
-
----
-
-## 🗄️ Database Schema
-
-### Tables
-
-#### `profiles`
-Extends Supabase auth.users
-| Column | Type | Description |
-|--------|------|-------------|
-| id | UUID | Primary key (from auth.users) |
-| name | TEXT | User's full name |
-| email | TEXT | User's email |
-| is_admin | BOOLEAN | Admin flag |
-
-#### `products`
-| Column | Type | Description |
-|--------|------|-------------|
-| id | UUID | Primary key |
-| name | TEXT | Product name |
-| image | TEXT | Image URL |
-| category | TEXT | Product category |
-| price | DECIMAL | Price in PKR |
-| count_in_stock | INTEGER | Available stock |
-| rating | DECIMAL | Average rating |
-
-#### `orders`
-| Column | Type | Description |
-|--------|------|-------------|
-| id | UUID | Primary key |
-| order_id | TEXT | Human-readable order ID |
-| user_id | UUID | Reference to user |
-| order_items | JSONB | Cart items |
-| shipping_address | JSONB | Delivery address |
-| total_price | DECIMAL | Order total |
-| order_status | TEXT | Processing/Shipped/Delivered |
-
----
-
-## 🌐 Deployment
-
-### Vercel (Recommended)
-
-1. Connect your GitHub repository to Vercel
-2. Add environment variables in Vercel dashboard
-3. Deploy!
-
-### Netlify
-
-```bash
+```powershell
 npm run build
-# Deploy the `dist` folder to Netlify
+npm run preview
+npx playwright install chromium
+npm test
 ```
 
-### GitHub Pages
+Browser tests expect the dev server on port 3000. Tests cover search, categories, price/sort controls, direct product URLs, size selection, zoom, cart persistence and stock caps, draft saving/deletion, mobile navigation, reduced motion, backward scrolling, image loading, and automated accessibility checks. See `docs/qa` for review artifacts.
 
-Enable GitHub Pages in repository settings and configure the workflow.
+## Implemented
 
----
+- Original supplied logo stored locally in `public/brand`; original branded product assets reused, with corrected apricot-oil concept packaging.
+- Editorial homepage, collection, product pages, About, Journal, Contact, Shipping/Returns, Privacy and Terms.
+- Native scrolling, a sticky product display with reversible GSAP transforms, short entrance animation, and mobile/reduced-motion alternatives. No forced scrolling or long pinned timeline.
+- Search/category/price filters, sorting, size links, image detail view, related products and keyboard-accessible cart dialog.
+- Device-local, validated persistent cart. Prices are taken from catalog data, not from stored cart objects.
+- Checkout saves a clearly identified local order draft. **No payment methods, payment processing, live order submission or fake order confirmation.** This follows the owner's request.
+- Optimized local WebP imagery, local licensed DM Sans font, lazy route chunks and GitHub Pages base-path support.
 
-## 🤝 Contributing
+## Content and launch status
 
-Contributions are welcome! Please follow these steps:
+`data/catalog.ts` holds five sample SKUs from the existing store. Prices and stock are samples; supplier provenance, inventory, packaging and specifications must be verified. No invented reviews, organic certifications, laboratory results or health claims are shown. The supplied brand name does not establish certification.
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Contact details and policies have not been verified. Draft customer details stay in localStorage and can be deleted from Privacy. No secrets or backend credentials are required. The earlier Supabase/email files are inactive legacy integration scaffolding, not a working order backend.
 
----
+Because the store uses sample inventory, `noindex` metadata and robots blocking are intentional. Before a commercial launch, confirm all business content, add a real order backend and approved policies, replace/approve concept imagery, and revisit indexability, canonical metadata, sitemap and server rendering/prerendering. Current hash routes preserve existing links but are not server-rendered product pages.
 
-## 📄 License
+## Deploy
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+The existing `.github/workflows/main.yml` builds and deploys `main` to GitHub Pages. It derives the asset base path from the Pages configuration, supporting both project paths and custom domains. No new hosting account or payment setup is needed for the preview.
 
----
+For Vercel or a root-domain static host: `npm run build`, publish `dist/`, leave `VITE_BASE=/`.
+For a manual project Pages build: set `VITE_BASE=/Skardu_Organic/` before building. See `.env.example`.
 
-## 📞 Contact
+## Structure
 
-**Skardu Organics**
+- `App.tsx`: shared navigation, routing and layout
+- `components/HomePage.tsx`: editorial sections and motion lifecycle
+- `components/ShopPages.tsx`: catalog, product and draft checkout
+- `components/StoreUI.tsx`: official logo, product cards, quantity and cart UI
+- `components/InfoPage.tsx`: informational pages and source links
+- `lib/cart.tsx`: normalized cart state and local persistence
+- `data/catalog.ts`: editable sample product data
+- `styles.css`, `brand-refinement.css`: responsive design tokens and layouts
+- `tests/store.spec.ts`: end-to-end and accessibility tests
+- `scripts/prepare-assets.mjs`: optional authoring helper requiring original local generated images; never run during deployment
+- `scripts/measure.mjs`: synthetic performance probe against production preview on port 4173
 
-- 🌐 Website: [skarduorganic.com](https://skarduorganic.com)
-- 📧 Email: contact@skarduorganic.com
-- 📍 Location: Skardu, Gilgit-Baltistan, Pakistan
+## Documentation
 
----
-
-<div align="center">
-
-**Made with ❤️ in the Himalayas**
-
-</div>
+- [Research](docs/research.md)
+- [Creative direction](docs/brand-story.md)
+- [Asset sources and generation prompts](docs/assets.md)
+- [Implementation checklist](docs/checklist.md)
+- [Handoff report](docs/final-report.md)
