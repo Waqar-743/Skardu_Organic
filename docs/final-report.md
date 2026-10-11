@@ -42,3 +42,5 @@ Synthetic production-preview measurement at 390×844, CPU 4× slowdown, 1.6 Mbps
 - No supplier/farmer interview, competitor mobile/motion review or field performance data was claimed.
 
 The repository's existing main-branch GitHub Pages workflow is retained, upgraded to Node 22 and configured to derive the correct asset base path from Pages settings. README.md includes local run/build/test and static deployment instructions.
+
+Verified release: commit `e5ecb38` was pushed to `main` on the owner's repository. GitHub Pages build and deployment completed successfully in [workflow run 38117584837](https://github.com/Waqar-743/Skardu_Organic/actions/runs/38117584837). The visible local preview remains available at http://127.0.0.1:3000/.

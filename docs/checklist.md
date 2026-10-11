@@ -15,6 +15,6 @@
 - [x] Measure synthetic performance and document its limits.
 - [x] Open the visible local preview for the owner.
 - [x] Document configuration and owner information needed for launch.
-- [ ] Push verified changes to the owner's existing GitHub repository.
+- [x] Push verified changes to the owner's existing GitHub repository.
 
 Payments remain intentionally omitted. Commercial launch still requires confirmed inventory, suppliers, packaging, contact details, delivery/return policies and a real order backend.
