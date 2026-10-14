@@ -106,25 +106,25 @@ test("desktop scroll timeline is reversible; imagery and accessibility", async (
 }) => {
   await page.goto("/");
   await page.waitForTimeout(1800);
-  const story = page.locator(".product-story");
+  const story = page.locator(".story");
   const top = await story.evaluate(
     (el) => el.getBoundingClientRect().top + scrollY,
   );
   await page.evaluate((y) => window.scrollTo(0, y + 950), top);
   await page.waitForTimeout(1600);
-  await expect(page.locator(".journey-steps")).toBeVisible();
+  await expect(page.locator(".story-stepbar")).toBeVisible();
   const after = await page
-    .locator(".journey-bottle")
+    .locator(".story-bottle")
     .evaluate((el) => getComputedStyle(el).transform);
   await page.screenshot({ path: "docs/qa/desktop-story.png" });
-  await expect(page.locator(".pin-spacer")).toHaveCount(0);
+  await expect(page.locator(".pin-spacer")).toHaveCount(1);
   await page.evaluate((y) => window.scrollTo(0, y - 100), top);
   await page.waitForTimeout(1600);
   const before = await page
-    .locator(".journey-bottle")
+    .locator(".story-bottle")
     .evaluate((el) => getComputedStyle(el).transform);
   expect(before).not.toBe(after);
-  await expect(page.locator(".journey-heading")).toBeVisible();
+  await expect(page.locator(".story-grid")).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.waitForTimeout(1000);
   const axe = await new AxeBuilder({ page })
@@ -215,7 +215,7 @@ test("mobile navigation, cart focus, reduced motion, direct routes and invalid s
   );
   expect(results.violations).toEqual([]);
   await page.goto("/");
-  await page.locator(".product-story").scrollIntoViewIfNeeded();
-  await expect(page.locator(".journey-steps")).toBeVisible();
+  await page.locator(".story").scrollIntoViewIfNeeded();
+  await expect(page.locator(".story-stepbar")).toBeVisible();
   expect(await page.locator(".pin-spacer").count()).toBe(0);
 });

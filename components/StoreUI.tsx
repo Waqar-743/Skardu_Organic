@@ -67,7 +67,7 @@ export function Icon({
     </svg>
   );
 }
-export function Logo() {
+export function Logo({ light = false }: { light?: boolean }) {
   return (
     <a
       className="logo official-logo"
@@ -75,7 +75,10 @@ export function Logo() {
       aria-label="Skardu Organic home"
     >
       <img
-        src={import.meta.env.BASE_URL + "brand/official-logo.png"}
+        src={
+          import.meta.env.BASE_URL +
+          (light ? "brand/official-logo-light.png" : "brand/official-logo.png")
+        }
         alt="Skardu Organic — Pure. Fresh. Natural."
         width="1000"
         height="337"
