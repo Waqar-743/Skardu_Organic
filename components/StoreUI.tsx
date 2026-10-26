@@ -109,20 +109,20 @@ export function ProductCard({ product }: { product: StoreProduct }) {
             <h3>{product.shortName}</h3>
           </a>
           <span>
-            {product.size} <i>·</i> Sample selection
+            {product.size}
           </span>
         </div>
-        <button
-          className="add-small"
-          onClick={() => add(product._id)}
-          aria-label={`Add ${product.shortName} ${product.size} to bag`}
-        >
-          <Icon name="plus" />
-        </button>
       </div>
       <p className="price">
         {money(product.price)} <span>PKR</span>
       </p>
+      <button
+        className="product-add"
+        onClick={() => add(product._id)}
+        aria-label={`Add ${product.shortName} ${product.size} to bag`}
+      >
+        <Icon name="plus" /><span>Add to bag</span>
+      </button>
     </article>
   );
 }

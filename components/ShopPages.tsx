@@ -1,14 +1,93 @@
 import React, { useEffect, useState } from "react";
-import { catalog, categories, money, StoreProduct } from "../data/catalog";
+import { catalog, categories, money } from "../data/catalog";
 import { useCart } from "../lib/cart";
 import { Icon, ProductCard, Quantity } from "./StoreUI";
 
+const sortOptions = ["curated", "low", "high", "name"];
+const priceOptions = ["all", "1500", "2000"];
+
+function collectionParams() {
+  return new URLSearchParams(location.hash.split("?")[1] || "");
+}
+
+function collectionCategory(value: string | null) {
+  return value && categories.includes(value) ? value : "All";
+}
+
 export function ShopPage({ initialQuery = "" }: { initialQuery?: string }) {
-  const [query, setQuery] = useState(initialQuery),
-    [category, setCategory] = useState("All"),
-    [sort, setSort] = useState("curated"),
-    [max, setMax] = useState("all");
-  useEffect(() => setQuery(initialQuery), [initialQuery]);
+  const [query, setQuery] = useState(
+      () => collectionParams().get("q") ?? initialQuery,
+    ),
+    [category, setCategory] = useState(() =>
+      collectionCategory(collectionParams().get("category")),
+    ),
+    [sort, setSort] = useState(() => {
+      const value = collectionParams().get("sort");
+      return value && sortOptions.includes(value) ? value : "curated";
+    }),
+    [max, setMax] = useState(() => {
+      const value = collectionParams().get("max");
+      return value && priceOptions.includes(value) ? value : "all";
+    });
+
+  useEffect(() => {
+    const syncLocation = () => {
+      if (location.hash.split("?")[0] !== "#/shop") return;
+      const params = collectionParams();
+      setQuery(params.get("q") ?? "");
+      setCategory(collectionCategory(params.get("category")));
+      // Category and search links can change without remounting this page.
+      // Keep independent price/sort choices unless the link specifies them.
+      if (params.has("sort")) {
+        const value = params.get("sort")!;
+        setSort(sortOptions.includes(value) ? value : "curated");
+      }
+      if (params.has("max")) {
+        const value = params.get("max")!;
+        setMax(priceOptions.includes(value) ? value : "all");
+      }
+    };
+    syncLocation();
+    window.addEventListener("hashchange", syncLocation);
+    return () => window.removeEventListener("hashchange", syncLocation);
+  }, [initialQuery]);
+
+  function updateFilters(
+    changes: Partial<{
+      query: string;
+      category: string;
+      sort: string;
+      max: string;
+    }>,
+  ) {
+    const next = { query, category, sort, max, ...changes };
+    setQuery(next.query);
+    setCategory(next.category);
+    setSort(next.sort);
+    setMax(next.max);
+    const params = new URLSearchParams();
+    if (next.query) params.set("q", next.query);
+    if (next.category !== "All") params.set("category", next.category);
+    if (next.sort !== "curated") params.set("sort", next.sort);
+    if (next.max !== "all") params.set("max", next.max);
+    const search = params.toString();
+    const previousURL = location.href;
+    // Replacing the URL keeps the current filters shareable without jumping
+    // the page or adding a browser-history entry for every search keystroke.
+    history.replaceState(
+      history.state,
+      "",
+      `${location.pathname}${location.search}#/shop${search ? `?${search}` : ""}`,
+    );
+    if (location.href !== previousURL) {
+      window.dispatchEvent(
+        new HashChangeEvent("hashchange", {
+          oldURL: previousURL,
+          newURL: location.href,
+        }),
+      );
+    }
+  }
   const products = catalog
     .filter(
       (p) =>
@@ -30,13 +109,14 @@ export function ShopPage({ initialQuery = "" }: { initialQuery?: string }) {
   return (
     <div className="section-wrap page">
       <div className="page-intro">
-        <p className="eyebrow">The collection / Sample catalog</p>
+        <p className="eyebrow">Skardu Organic</p>
         <h1>
-          A taste of
-          <br />
-          <em>somewhere special.</em>
+          Shop the <em>collection.</em>
         </h1>
-        <p>Orchard favourites, golden oils and mountain-inspired essentials.</p>
+        <p>
+          Dried apricots, whole almonds, apricot kernel oil and shilajit. Find
+          your favourites by category or compare prices.
+        </p>
       </div>
       <div className="shop-controls">
         <label className="search-field">
@@ -44,14 +124,17 @@ export function ShopPage({ initialQuery = "" }: { initialQuery?: string }) {
           <input
             type="search"
             aria-label="Search products"
-            placeholder="Find something good…"
+            placeholder="Search apricots, almonds, oils…"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => updateFilters({ query: e.target.value })}
           />
         </label>
         <label>
           Price
-          <select value={max} onChange={(e) => setMax(e.target.value)}>
+          <select
+            value={max}
+            onChange={(e) => updateFilters({ max: e.target.value })}
+          >
             <option value="all">All prices</option>
             <option value="1500">Up to Rs. 1,500</option>
             <option value="2000">Up to Rs. 2,000</option>
@@ -59,7 +142,10 @@ export function ShopPage({ initialQuery = "" }: { initialQuery?: string }) {
         </label>
         <label>
           Sort by
-          <select value={sort} onChange={(e) => setSort(e.target.value)}>
+          <select
+            value={sort}
+            onChange={(e) => updateFilters({ sort: e.target.value })}
+          >
             <option value="curated">Our selection</option>
             <option value="low">Price: low to high</option>
             <option value="high">Price: high to low</option>
@@ -73,13 +159,15 @@ export function ShopPage({ initialQuery = "" }: { initialQuery?: string }) {
             <button
               key={c}
               aria-pressed={category === c}
-              onClick={() => setCategory(c)}
+              onClick={() => updateFilters({ category: c })}
             >
               {c}
             </button>
           ))}
         </div>
-        <p aria-live="polite">{products.length} products</p>
+        <p aria-live="polite">
+          {products.length} {products.length === 1 ? "product" : "products"}
+        </p>
       </div>
       {products.length ? (
         <div className="product-grid" key={`${category}-${sort}-${max}`}>
@@ -94,9 +182,7 @@ export function ShopPage({ initialQuery = "" }: { initialQuery?: string }) {
           <button
             className="button"
             onClick={() => {
-              setQuery("");
-              setCategory("All");
-              setMax("all");
+              updateFilters({ query: "", category: "All", max: "all" });
             }}
           >
             Clear filters <Icon />
@@ -104,8 +190,8 @@ export function ShopPage({ initialQuery = "" }: { initialQuery?: string }) {
         </div>
       )}
       <p className="sample-note">
-        Sample catalog · Availability, prices and product specifications are not
-        confirmed for sale.
+        Sample catalog: prices, stock and specifications are unconfirmed.
+        Live ordering is not yet available.
       </p>
     </div>
   );
@@ -161,10 +247,6 @@ export function ProductPage({
             />
             <span>{zoom ? "− Zoom out" : "+ Inspect the details"}</span>
           </button>
-          <p className="sample-note">
-            Illustrative product image. Packaging and appearance require
-            approval.
-          </p>
           <div className="gallery-tabs" aria-label="Image view">
             <button aria-pressed={!zoom} onClick={() => setZoom(false)}>
               Full view
@@ -175,11 +257,11 @@ export function ProductPage({
           </div>
         </div>
         <div className="detail-copy">
-          <p className="eyebrow">{product.category} / Sample collection</p>
+          <p className="eyebrow">{product.category}</p>
           <h1>{product.shortName}</h1>
           <p className="detail-note">{product.note}</p>
           <p className="detail-price">
-            {money(product.price)} <small>PKR · sample price</small>
+            {money(product.price)} <small>PKR</small>
           </p>
           <p>{product.description}</p>
           <fieldset className="variants">
@@ -196,7 +278,7 @@ export function ProductPage({
             ))}
           </fieldset>
           <p className="availability">
-            <span /> Available in this preview · Live stock unconfirmed
+            Stock confirmation pending · Orders save as drafts
           </p>
           <div className="buy-row">
             <Quantity
@@ -218,6 +300,8 @@ export function ProductPage({
           <div className="product-facts">
             <h3>Know what’s inside</h3>
             <p>{product.details}</p>
+            <h3>Product imagery</h3>
+            <p>Illustrative product image. Final packaging and appearance require approval.</p>
             <h3>Delivery & returns</h3>
             <p>
               Live ordering is not enabled. Delivery areas, costs and return

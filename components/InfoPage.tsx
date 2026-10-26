@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { visual } from "../data/catalog";
 import { Icon } from "./StoreUI";
+import StoryPage from "./StoryPage";
 const sources = [
   [
     "Gilgit-Baltistan Tourism Department",
@@ -17,6 +18,7 @@ const sources = [
 ];
 export default function InfoPage({ page }: { page: string }) {
   const [deleted, setDeleted] = useState(false);
+  if (page === "about") return <StoryPage />;
   if (page === "about" || page === "journal")
     return (
       <div className="section-wrap page info-page">

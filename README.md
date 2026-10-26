@@ -25,13 +25,13 @@ Browser tests expect the dev server on port 3000. Tests cover search, categories
 ## Implemented
 
 - Original supplied logo stored locally in `public/brand`; original branded product assets reused, with corrected apricot-oil concept packaging.
-- Editorial homepage, collection, product pages, About, Journal, Contact, Shipping/Returns, Privacy and Terms.
+- Shopping homepage with a compact video hero, four product families, visible prices, full add-to-bag buttons and working category links. The former homepage's brand narrative now lives on Our Story.
 - Owner-selected apricot-and-almond hero video: silent, looping inline playback with no visible player controls. A matching still remains for reduced motion or failed autoplay; playback rests while the hero is offscreen or the tab is hidden.
-- Native scrolling, a sticky product display with reversible GSAP transforms, short entrance animation, and mobile/reduced-motion alternatives. No forced scrolling or long pinned timeline.
+- Solid sticky store header, visible category navigation, desktop/mobile search, keyboard-friendly mobile menu and native scrolling. Layouts adapt from small phones through wide desktop screens.
 - Search/category/price filters, sorting, size links, image detail view, related products and keyboard-accessible cart dialog.
 - Device-local, validated persistent cart. Prices are taken from catalog data, not from stored cart objects.
 - Checkout saves a clearly identified local order draft. **No payment methods, payment processing, live order submission or fake order confirmation.** This follows the owner's request.
-- Optimized local WebP imagery, local licensed DM Sans font, lazy route chunks and GitHub Pages base-path support.
+- Optimized local WebP imagery, locally bundled Fraunces/Instrument Sans fonts, lazy route chunks and GitHub Pages base-path support.
 
 ## Content and launch status
 
@@ -50,15 +50,17 @@ For a manual project Pages build: set `VITE_BASE=/Skardu_Organic/` before buildi
 
 ## Structure
 
-- `App.tsx`: shared navigation, routing and layout
-- `components/HomePage.tsx`: editorial sections and motion lifecycle
+- `App.tsx`: routing, cart notifications and shared layout
+- `components/StoreLayout.tsx`: persistent store header, search, mobile navigation and footer
+- `components/HomePage.tsx`: product-focused shopping homepage
+- `components/StoryPage.tsx`: previous homepage narrative, origin and product process content
 - `components/ShopPages.tsx`: catalog, product and draft checkout
 - `components/StoreUI.tsx`: official logo, product cards, quantity and cart UI
 - `components/InfoPage.tsx`: informational pages and source links
 - `lib/cart.tsx`: normalized cart state and local persistence
 - `data/catalog.ts`: editable sample product data
-- `styles.css`, `brand-refinement.css`: responsive design tokens and layouts
-- `tests/store.spec.ts`: end-to-end and accessibility tests
+- `styles.css`, `storefront.css`, `components/StoryPage.css`: shared design tokens and responsive layouts
+- `tests/store.spec.ts`, `tests/hero.spec.ts`: shopping, responsive, accessibility and video tests
 - `scripts/prepare-assets.mjs`: optional authoring helper requiring original local generated images; never run during deployment
 - `scripts/measure.mjs`: synthetic performance probe against production preview on port 4173
 

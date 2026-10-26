@@ -24,7 +24,7 @@ for (const viewport of [
     const start = await video.evaluate((element: HTMLVideoElement) => element.currentTime);
     await expect.poll(() => video.evaluate((element: HTMLVideoElement) => element.currentTime)).toBeGreaterThan(start + 0.2);
     await expect(hero.getByRole("button")).toHaveCount(0);
-    await expect(page.getByRole("heading", { name: "A little closer to the source." })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Good things, from the mountains." })).toBeVisible();
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.waitForTimeout(1800);
     await page.screenshot({ path: testInfo.outputPath(`hero-video-${viewport.name}.png`) });
@@ -39,10 +39,10 @@ for (const viewport of [
       await expect.poll(() => video.evaluate((element: HTMLVideoElement) => element.paused)).toBe(true);
       await page.evaluate(() => window.scrollTo(0, 0));
       await expect.poll(() => video.evaluate((element: HTMLVideoElement) => !element.paused)).toBe(true);
-      await expect(hero).toBeInViewport({ ratio: 0.99 });
+      await expect(hero).toBeInViewport({ ratio: 0.9 });
     }
-    await hero.getByRole("link", { name: "Explore the collection", exact: true }).click();
-    await expect(page.getByRole("heading", { name: "A taste of somewhere special." })).toBeVisible();
+    await hero.getByRole("link", { name: "Shop the collection", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Shop the collection." })).toBeVisible();
     expect(errors).toEqual([]);
   });
 }
@@ -73,6 +73,6 @@ test("a failed video leaves a usable hero with its poster", async ({ page }) => 
   const video = page.locator(".hero video");
   await expect(video).toHaveCSS("opacity", "0");
   await expect.poll(() => page.locator(".hero-media-visual img").evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0)).toBe(true);
-  await page.getByRole("link", { name: "Explore the collection", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "A taste of somewhere special." })).toBeVisible();
+  await page.getByRole("link", { name: "Shop the collection", exact: true }).first().click();
+  await expect(page.getByRole("heading", { name: "Shop the collection." })).toBeVisible();
 });

@@ -1,0 +1,474 @@
+.brand-story {
+  padding-top: clamp(36px, 5vw, 72px);
+}
+
+.brand-story :is(h1, h2, h3, p, a, figure, div) {
+  min-width: 0;
+}
+
+.brand-story h1 {
+  font-size: clamp(44px, 6.3vw, 92px);
+  line-height: 1.05;
+}
+
+.brand-story h2 {
+  font-size: clamp(32px, 3.5vw, 52px);
+  line-height: 1.12;
+}
+
+.brand-story h3 {
+  font-size: clamp(20px, 1.7vw, 25px);
+  line-height: 1.3;
+}
+
+.brand-story p {
+  line-height: 1.75;
+}
+
+.brand-story figure {
+  overflow: hidden;
+}
+
+.brand-story figcaption {
+  padding-top: 12px;
+  font-size: 12px;
+  color: var(--stone);
+}
+
+.brand-story .eyebrow {
+  margin-bottom: 22px;
+  line-height: 1.7;
+}
+
+.brand-story-intro {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  align-items: center;
+  gap: clamp(32px, 6vw, 96px);
+  padding-bottom: clamp(58px, 7vw, 100px);
+}
+
+.brand-story-intro-copy > .brand-story-lead {
+  margin-block: 24px 30px;
+  max-width: 39ch;
+}
+
+.brand-story-lead {
+  font-size: clamp(18px, 1.6vw, 22px);
+  line-height: 1.6;
+}
+
+.brand-story-intro-image {
+  padding-top: 36px;
+}
+
+.brand-story-intro-image img {
+  aspect-ratio: 1.2;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 3px;
+}
+
+.brand-story-belief {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 32px;
+  padding-block: clamp(42px, 6vw, 78px);
+  border-top: 1px solid var(--line);
+}
+
+.brand-story-belief h2 {
+  max-width: 23ch;
+}
+
+.brand-story-belief div > p {
+  margin-top: 28px;
+}
+
+.brand-story-harvest {
+  margin-top: 18px;
+  padding-block: clamp(48px, 6vw, 84px);
+  background: var(--cream);
+}
+
+.brand-story-harvest-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  column-gap: clamp(32px, 7vw, 110px);
+  row-gap: 30px;
+  align-items: start;
+}
+
+.brand-story-harvest-heading {
+  grid-column: 1;
+}
+
+.brand-story-harvest-heading > p:last-child {
+  margin-top: 20px;
+}
+
+.brand-story-oil {
+  grid-column: 1;
+}
+
+.brand-story-oil img {
+  width: min(100%, 330px);
+  aspect-ratio: 4 / 5;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 3px;
+}
+
+.brand-story-process {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  list-style: none;
+}
+
+.brand-story-process li,
+.brand-story-shopping li {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 20px;
+  padding-block: 26px;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand-story-process li:first-child {
+  padding-top: 0;
+}
+
+.brand-story-process li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.brand-story-number {
+  padding-top: 4px;
+  color: var(--apricot-deep);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.brand-story-process h3 + p,
+.brand-story-shopping h3 + p {
+  margin-top: 12px;
+}
+
+.brand-story-process .text-link {
+  margin-top: 22px;
+}
+
+.brand-story-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 100%;
+  padding-block: 12px 5px;
+  color: var(--apricot-deep);
+  font-size: 13px;
+  line-height: 1.6;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.brand-story-source svg {
+  width: 15px;
+  height: 15px;
+}
+
+.brand-story-source:hover {
+  color: var(--ink);
+}
+
+.brand-story-place {
+  display: grid;
+  grid-template-columns: 0.95fr 1fr;
+  align-items: start;
+  gap: clamp(36px, 7vw, 110px);
+  padding-block: clamp(58px, 7vw, 100px);
+}
+
+.brand-story-orchard img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: 3px;
+}
+
+.brand-story-place-copy h2 {
+  margin-bottom: 24px;
+}
+
+.brand-story-place-copy > p + p {
+  margin-top: 18px;
+}
+
+.brand-story-heritage {
+  margin-top: 32px;
+  padding-top: 30px;
+  border-top: 1px solid var(--line);
+}
+
+.brand-story-heritage h3 {
+  margin-bottom: 16px;
+}
+
+.brand-story-families {
+  padding-bottom: clamp(58px, 7vw, 100px);
+}
+
+.brand-story-section-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.brand-story-section-head .text-link {
+  flex-shrink: 0;
+}
+
+.brand-story-family-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.brand-story-family {
+  display: block;
+}
+
+.brand-story-family img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  border-radius: 3px;
+}
+
+.brand-story-family > span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block: 16px 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand-story-family strong {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.brand-story-family svg {
+  width: 18px;
+  height: 18px;
+}
+
+.brand-story-family:hover {
+  color: var(--apricot-deep);
+}
+
+.brand-story-shopping {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(36px, 8vw, 120px);
+  padding-block: clamp(42px, 5vw, 72px);
+  border-top: 1px solid var(--line);
+}
+
+.brand-story-shopping ol {
+  list-style: none;
+}
+
+.brand-story-shopping li:first-child {
+  padding-top: 0;
+}
+
+.brand-story-shopping li:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.brand-story-shopping h3 {
+  font-size: 20px;
+}
+
+.brand-story-notes {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 30px;
+  border-block: 1px solid var(--line);
+  padding-block: 32px;
+}
+
+.brand-story-notes h2 {
+  font-size: clamp(25px, 2.5vw, 34px);
+}
+
+.brand-story-notes p {
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--stone);
+}
+
+.brand-story-notes p + p {
+  margin-top: 14px;
+}
+
+.brand-story-closing {
+  padding-block: clamp(58px, 7vw, 100px);
+}
+
+.brand-story-closing > div {
+  max-width: 860px;
+  text-align: center;
+}
+
+.brand-story-closing .eyebrow {
+  justify-content: center;
+}
+
+.brand-story-closing p:not(.eyebrow) {
+  max-width: 52ch;
+  margin: 24px auto 30px;
+}
+
+@media (min-width: 1600px) {
+  .brand-story > .section-wrap,
+  .brand-story-harvest > .section-wrap {
+    max-width: 1320px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .brand-story-intro {
+    gap: 32px;
+  }
+
+  .brand-story-belief,
+  .brand-story-notes {
+    grid-template-columns: 1fr 2.2fr;
+  }
+
+  .brand-story-place {
+    gap: 36px;
+  }
+
+  .brand-story-family-grid {
+    gap: 16px;
+  }
+
+  .brand-story-family strong {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 760px) {
+  .brand-story-intro,
+  .brand-story-belief,
+  .brand-story-harvest-inner,
+  .brand-story-place,
+  .brand-story-shopping,
+  .brand-story-notes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .brand-story-intro {
+    gap: 30px;
+  }
+
+  .brand-story-intro-copy > .brand-story-lead {
+    max-width: 42ch;
+  }
+
+  .brand-story-intro-image {
+    padding-top: 0;
+  }
+
+  .brand-story-intro-image img {
+    aspect-ratio: 1.6;
+  }
+
+  .brand-story-belief {
+    gap: 0;
+  }
+
+  .brand-story-belief h2 {
+    max-width: 28ch;
+  }
+
+  .brand-story-process {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .brand-story-oil img {
+    max-width: 280px;
+    width: 100%;
+  }
+
+  .brand-story-place {
+    gap: 32px;
+  }
+
+  .brand-story-orchard img {
+    aspect-ratio: 1.15;
+    max-height: 480px;
+  }
+
+  .brand-story-section-head {
+    display: grid;
+    gap: 20px;
+  }
+
+  .brand-story-section-head .text-link {
+    justify-self: start;
+  }
+
+  .brand-story-family-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 16px;
+  }
+
+  .brand-story-family > span {
+    align-items: start;
+    gap: 6px;
+    padding-top: 12px;
+  }
+
+  .brand-story-shopping {
+    gap: 30px;
+  }
+
+  .brand-story-notes {
+    gap: 20px;
+  }
+
+  .brand-story-closing {
+    text-align: left;
+  }
+}
+
+@media (max-width: 360px) {
+  .brand-story h1 {
+    font-size: 40px;
+  }
+
+  .brand-story .eyebrow {
+    letter-spacing: 0.14em;
+  }
+
+  .brand-story-family strong {
+    font-size: 13px;
+  }
+
+  .brand-story .button {
+    padding-inline: 20px;
+    letter-spacing: 0.09em;
+  }
+}

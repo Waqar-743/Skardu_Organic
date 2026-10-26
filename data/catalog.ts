@@ -60,7 +60,7 @@ export const catalog: StoreProduct[] = [
     tone: "sage",
     note: "Simple things, thoughtfully chosen.",
     description:
-      "A classic pantry ingredient for sharing, baking and everyday snacking. This sample listing carries the original store’s proposed 500 g size.",
+      "Whole almonds for sharing, baking and everyday snacking. Explore the 500 g pack for your pantry.",
     details:
       "Contains tree nuts. Cultivar, origin, processing, cross-contact information and packaging require supplier approval.",
   },
@@ -77,7 +77,7 @@ export const catalog: StoreProduct[] = [
     tone: "stone",
     note: "From the original collection.",
     description:
-      "A resin product retained from the original store catalog. Shown here as a sample while sourcing, composition and quality documentation are reviewed.",
+      "Shilajit resin in a 20 g size. Compare the two available sizes and review the product information before choosing.",
     details:
       "This is not a verified supplement listing. No purity, laboratory testing, medical benefit or usage claim is made. Supplier evidence is required before sale.",
   },
@@ -94,7 +94,7 @@ export const catalog: StoreProduct[] = [
     tone: "stone",
     note: "A smaller sample size.",
     description:
-      "The smaller resin size from the original catalog, included for comparing product options. Availability and specifications remain unverified.",
+      "The smaller 10 g size of our shilajit resin selection. Compare sizes and review the product details to find the right option for your bag.",
     details:
       "Sample only. Supplier evidence, ingredient specification, testing and approved labeling are required before sale.",
   },
