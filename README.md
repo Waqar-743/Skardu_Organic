@@ -26,6 +26,7 @@ Browser tests expect the dev server on port 3000. Tests cover search, categories
 
 - Original supplied logo stored locally in `public/brand`; original branded product assets reused, with corrected apricot-oil concept packaging.
 - Editorial homepage, collection, product pages, About, Journal, Contact, Shipping/Returns, Privacy and Terms.
+- Owner-selected apricot-and-almond hero video: silent, looping inline playback with no visible player controls. A matching still remains for reduced motion or failed autoplay; playback rests while the hero is offscreen or the tab is hidden.
 - Native scrolling, a sticky product display with reversible GSAP transforms, short entrance animation, and mobile/reduced-motion alternatives. No forced scrolling or long pinned timeline.
 - Search/category/price filters, sorting, size links, image detail view, related products and keyboard-accessible cart dialog.
 - Device-local, validated persistent cart. Prices are taken from catalog data, not from stored cart objects.

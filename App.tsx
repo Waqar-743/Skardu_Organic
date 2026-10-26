@@ -162,7 +162,7 @@ function Store() {
         <i />
       </div>
       <header
-        className={`site-header${menu ? " menu-open" : ""}`}
+        className={`site-header${path === "#/" ? " is-home" : ""}${menu ? " menu-open" : ""}`}
         ref={header}
       >
         <Logo />

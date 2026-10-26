@@ -5,6 +5,7 @@ import { SplitText } from "gsap/SplitText";
 import { catalog, money, visual } from "../data/catalog";
 import { useCart } from "../lib/cart";
 import { Icon } from "./StoreUI";
+import HeroBackground from "./HeroBackground";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -220,7 +221,7 @@ export default function HomePage() {
           ease: "power3.out",
           clearProps: "all",
         });
-        gsap.from(".hero-media img", {
+        gsap.from(".hero-media-visual", {
           scale: 1.08,
           duration: 1.8,
           ease: "power2.out",
@@ -238,7 +239,7 @@ export default function HomePage() {
             scrub: 0.5,
           },
         });
-        gsap.to(".hero-media img", {
+        gsap.to(".hero-media-visual", {
           scale: 1.12,
           ease: "none",
           scrollTrigger: {
@@ -327,18 +328,7 @@ export default function HomePage() {
       {/* — 00 · Hero —*/}
       <section className="hero" aria-labelledby="hero-title">
         <div className="hero-media">
-          <picture>
-            <source
-              media="(max-width: 700px)"
-              srcSet={visual("mountains-mobile")}
-            />
-            <img
-              src={visual("mountains")}
-              alt="Illustrative mountain valley and winding river inspired by Baltistan"
-              width="1672"
-              height="941"
-            />
-          </picture>
+          <HeroBackground />
           <div className="hero-shade" />
         </div>
         <div className="hero-inner section-wrap">

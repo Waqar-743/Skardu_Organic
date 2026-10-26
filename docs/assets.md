@@ -1,10 +1,12 @@
 # Asset manifest and review
 
-All active image outputs live in `public/images/`. `asset-dimensions.json` contains exact sizes, dimensions and alpha status. Original repository files remain untouched. Responsive hero rendition: `mountains-mobile.webp` (900px wide).
+Active image outputs live in `public/images/`, with the hero movie in `public/videos/`. `asset-dimensions.json` records the original image sizes, dimensions and alpha status; the selected video and its poster are documented below. Original repository files remain untouched.
 
 | Output | Source | Placement | Review / rights status |
 |---|---|---|---|
-| mountains.webp | Built-in imagegen, `exec-56548e1e-56b9-4d51-9aac-feaec8793780.png` | Hero and closing landscape | Visually inspected: clear mountain layers, river and usable composition. Generated illustration; not a verified Skardu photograph. Owner launch review pending. |
+| mountains.webp | Built-in imagegen, `exec-56548e1e-56b9-4d51-9aac-feaec8793780.png` | Closing landscape | Visually inspected: clear mountain layers, river and usable composition. Generated illustration; not a verified Skardu photograph. Owner launch review pending. |
+| videos/hero-apricot-almond.mp4 | Google Flow, ingredient still life, generated 2026-10-26 | Homepage hero background | Selected by owner from the video comparison. AI-generated apricots and almonds in an orchard setting, not documentation of a supplier or actual packaging. 1280 × 720, 24 fps, 7.5 s, 1,426,983 bytes; silent H.264 with fast-start metadata and a short loop crossfade. |
+| hero-apricot-almond.webp | First frame of the selected Flow clip | Hero poster and reduced-motion fallback | 1280 × 720, 102,184 bytes. Same composition as the video to avoid a visual jump. |
 | orchard.webp | Built-in imagegen, `exec-e0d03d6d-04c0-4d43-b78c-ef045aba60f2.png` | Origin/About/Journal | Visually inspected: coherent apricots, leaves and terrace; no people. Labelled illustrative, not a supplier orchard. |
 | apricot-oil.webp | Built-in imagegen, `exec-ad8523e7-1a13-4bd7-a10b-62972b5f12dd.png` | Product card, details and motion sequence | Visually inspected: legible label, believable glass, correct concept size. Alpha verified. Concept packaging only; actual package approval pending. |
 | apricots.webp | Repository `public/img/Dried-Apricot-500g.png` | Catalog/detail/cart | Visually inspected original. Stylized green bowl, not verified packaging. Copyright provenance not supplied; owner must clear reuse. |
@@ -13,6 +15,8 @@ All active image outputs live in `public/images/`. `asset-dimensions.json` conta
 | shilajit-small.webp | Repository `public/img/Shilajit-10g.png` | 10 g option | Retained sample imagery. Owner rights and accuracy review required. |
 
 New artwork was generated in the built-in tool under the user's request. No separate stock-license or documentary authenticity claim is made. No fake farmer photography or harvesting portraits were created. Craft photography, additional packaging angles and other categories await actual approved inventory rather than invented assets.
+
+The selected hero video was generated separately in [Google Flow](https://flow.google.com/project/d284c799-57b8-4ab1-944f-305ff82d38cb/edit/e1dfc5ad-094a-4f67-a705-0dfbe68ccb8b). The original eight-second download is retained locally by the owner. Website preparation removes audio, makes a half-second wrap crossfade, and places MP4 metadata before media data for streaming. It does not add product labels or replace the official website logo.
 
 ## Generation prompts
 ### Landscape
