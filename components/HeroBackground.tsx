@@ -15,8 +15,12 @@ export default function HeroBackground() {
       setMotionAllowed(!preference.matches);
     };
     updatePreference();
-    preference.addEventListener("change", updatePreference);
-    return () => preference.removeEventListener("change", updatePreference);
+    if (typeof preference.addEventListener === "function") {
+      preference.addEventListener("change", updatePreference);
+      return () => preference.removeEventListener("change", updatePreference);
+    }
+    preference.addListener(updatePreference);
+    return () => preference.removeListener(updatePreference);
   }, []);
 
   useEffect(() => {
@@ -35,17 +39,17 @@ export default function HeroBackground() {
         if (!disposed) setPlaying(false);
       });
     };
-    const observer = new IntersectionObserver(([entry]) => {
+    const observer = typeof IntersectionObserver === "function" ? new IntersectionObserver(([entry]) => {
       inView = entry.isIntersecting;
       updatePlayback();
-    });
-    observer.observe(element);
+    }) : null;
+    observer?.observe(element);
     document.addEventListener("visibilitychange", updatePlayback);
     updatePlayback();
 
     return () => {
       disposed = true;
-      observer.disconnect();
+      observer?.disconnect();
       document.removeEventListener("visibilitychange", updatePlayback);
       element.pause();
     };

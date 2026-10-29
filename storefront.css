@@ -3,6 +3,11 @@ html { scroll-behavior: auto; scroll-padding-top: 152px; }
 body { background: var(--cream); }
 body::after { content: none; }
 main { min-width: 0; }
+.store-load-error { padding-block: 64px; min-height: 50dvh; max-width: 760px; }
+.store-load-error h1 { font-size: clamp(30px, 5vw, 48px); margin-bottom: 20px; }
+.store-load-error > div { display: flex; align-items: center; flex-wrap: wrap; gap: 24px; margin-top: 24px; }
+.cart-dialog:not([open]) { display: none; }
+.cart-dialog[data-fallback="true"][open] { display: block; z-index: 1600; background: rgba(20,31,23,.5); }
 .store-announcement { min-height: 34px; padding: 7px var(--gutter); display: flex; justify-content: center; gap: 32px; align-items: center; background: var(--pine); color: var(--cream); font-size: 12px; line-height: 1.5; }
 .store-announcement a { text-decoration: underline; text-underline-offset: 3px; }
 .store-header { position: sticky; top: 0; z-index: 100; background: var(--cream); border-bottom: 1px solid var(--line); }

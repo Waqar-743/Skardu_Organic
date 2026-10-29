@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { StoreProduct, money } from "../data/catalog";
 import { useCart } from "../lib/cart";
 
@@ -168,23 +168,47 @@ export function CartDrawer({
 }) {
   const { lines, total, count, update } = useCart();
   const ref = useRef<HTMLDialogElement>(null);
+  const [nativeDialog] = useState(() => typeof HTMLDialogElement !== "undefined"
+    && typeof HTMLDialogElement.prototype.showModal === "function"
+    && typeof HTMLDialogElement.prototype.close === "function");
   useEffect(() => {
     const d = ref.current!;
+    const previousFocus = document.activeElement as HTMLElement | null;
     if (open) {
-      d.showModal();
+      if (nativeDialog) d.showModal();
+      else {
+        d.setAttribute("open", "");
+        d.querySelector<HTMLElement>("button")?.focus();
+      }
       document.body.style.overflow = "hidden";
     } else {
-      d.close();
+      if (nativeDialog) d.close();
+      else d.removeAttribute("open");
       document.body.style.overflow = "";
     }
-    return () => {
-      document.body.style.overflow = "";
+    const keyboard = (event: KeyboardEvent) => {
+      if (!open || nativeDialog) return;
+      if (event.key === "Escape") { event.preventDefault(); onClose(); }
+      if (event.key !== "Tab") return;
+      const controls = Array.from(d.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex="0"]'));
+      const first = controls[0], last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
     };
-  }, [open]);
+    d.addEventListener("keydown", keyboard);
+    return () => {
+      d.removeEventListener("keydown", keyboard);
+      document.body.style.overflow = "";
+      if (open && !nativeDialog) previousFocus?.focus();
+    };
+  }, [open, nativeDialog]);
   return (
     <dialog
       ref={ref}
       className="cart-dialog"
+      data-fallback={!nativeDialog || undefined}
+      role="dialog"
+      aria-modal={open ? "true" : undefined}
       aria-labelledby="bag-title"
       onCancel={onClose}
       onClick={(e) => {

@@ -3,6 +3,7 @@ import { CartProvider, useCart } from "./lib/cart";
 import { CartDrawer, Icon } from "./components/StoreUI";
 import { StoreHeader, StoreFooter } from "./components/StoreLayout";
 import HomePage from "./components/HomePage";
+import LoadBoundary from "./components/LoadBoundary";
 import "./styles.css";
 import "./storefront.css";
 
@@ -34,7 +35,7 @@ function Store() {
   }, []);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+    window.scrollTo({ top: 0, behavior: "auto" });
     const title = path.startsWith("#/product") ? "Product collection"
       : path === "#/shop" ? "Shop the collection"
       : path === "#/checkout" ? "Order draft"
@@ -58,6 +59,7 @@ function Store() {
       </div>
       <StoreHeader route={route} count={count} onOpenCart={() => setCartOpen(true)} />
       <main ref={main} id="main" tabIndex={-1}>
+        <LoadBoundary key={path} page>
         <Suspense fallback={<div className="page-loading" role="status">Opening the collection…</div>}>
           {path === "#/" ? <HomePage />
             : path === "#/shop" ? <ShopPage initialQuery={new URLSearchParams(route.split("?")[1] || "").get("q") || ""} />
@@ -65,6 +67,7 @@ function Store() {
             : path === "#/checkout" ? <CheckoutPage />
             : <InfoPage page={path.slice(2)} />}
         </Suspense>
+        </LoadBoundary>
       </main>
       <StoreFooter />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />

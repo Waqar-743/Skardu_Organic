@@ -5,6 +5,7 @@ import "@fontsource-variable/fraunces/full.css";
 import "@fontsource-variable/fraunces/full-italic.css";
 import "@fontsource-variable/instrument-sans";
 import App from './App';
+import LoadBoundary from './components/LoadBoundary';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -14,6 +15,6 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <App />
+    <LoadBoundary><App /></LoadBoundary>
   </React.StrictMode>
 );

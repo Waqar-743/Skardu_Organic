@@ -20,9 +20,40 @@
     <meta property="og:type" content="website" />
     <title>Skardu Organic — Dried fruits, oils &amp; mountain favourites</title>
     <link rel="icon" type="image/png" href="/brand/official-logo.png" />
+    <style>
+      .store-boot{box-sizing:border-box;min-height:65vh;max-width:560px;margin:auto;padding:80px 24px;color:#20291f;font:16px/1.65 system-ui,sans-serif}
+      .store-boot img{display:block;width:180px;height:auto;margin-bottom:32px}
+      .store-boot h1{font-size:28px;line-height:1.2}
+      .store-boot a{display:inline-block;margin-top:16px;padding:12px 20px;background:#24382b;color:#fbf9f0;text-decoration:none;border-radius:5px}
+      .store-boot a:focus-visible{outline:3px solid #a05628;outline-offset:4px}
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <section class="store-boot" aria-labelledby="boot-title">
+        <img src="%BASE_URL%brand/official-logo.png" width="1000" height="337" alt="Skardu Organic" />
+        <h1 id="boot-title">Opening the store…</h1>
+        <p id="boot-message">If the store is taking too long, try a fresh load.</p>
+        <a id="boot-reload" href="%BASE_URL%?reload=1">Reload store</a>
+        <noscript><p>JavaScript is turned off. Enable it in your browser to browse the collection and use your bag.</p></noscript>
+      </section>
+    </div>
+    <script>
+      // This small fallback works even if the main application download fails.
+      document.getElementById('boot-reload').addEventListener('click', function(event) {
+        event.preventDefault();
+        var next = new URL(window.location.href);
+        next.searchParams.delete('v');
+        next.searchParams.set('reload', Date.now().toString());
+        window.location.replace(next.href);
+      });
+      window.addEventListener('error', function(event) {
+        if (event.target && event.target.tagName === 'SCRIPT') {
+          var title = document.getElementById('boot-title');
+          if (title) title.textContent = 'The store couldn’t finish loading.';
+        }
+      }, true);
+    </script>
     <script type="module" src="/index.tsx"></script>
   </body>
 </html>
